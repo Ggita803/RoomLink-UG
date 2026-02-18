@@ -14,6 +14,7 @@ const auditRoutes = require("./modules/audit/audit.routes");
 const uploadRoutes = require("./modules/upload/upload.routes");
 const userRoutes = require("./modules/user/user.routes");
 const roomRoutes = require("./modules/room/room.routes");
+const hostelRoomRoutes = require("./modules/hostel/hostelRoom.routes");
 
 const router = express.Router();
 
@@ -35,5 +36,6 @@ router.use("/payments", paymentRoutes);
 router.use("/settlements", settlementRoutes);
 router.use("/audit", auditRoutes);
 router.use("/upload", uploadRoutes);
+router.use("/hostels/:hostelId/rooms", hostelRoomRoutes);
 
 module.exports = router;

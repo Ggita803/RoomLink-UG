@@ -49,4 +49,34 @@ router.delete(
   hostelController.deleteHostel
 );
 
+// Amenities routes
+router.get("/amenities", hostelController.getAmenities);
+router.post(
+  "/:id/amenities",
+  authenticate,
+  authorize("HOST", "ADMIN", "SUPER_ADMIN"),
+  hostelController.addAmenityToHostel
+);
+router.delete(
+  "/:id/amenities",
+  authenticate,
+  authorize("HOST", "ADMIN", "SUPER_ADMIN"),
+  hostelController.removeAmenityFromHostel
+);
+
+// Hostel images routes
+router.post(
+  "/:id/images",
+  authenticate,
+  authorize("HOST", "ADMIN", "SUPER_ADMIN"),
+  upload.fields([{ name: "images", maxCount: 10 }]),
+  hostelController.uploadHostelImages
+);
+router.delete(
+  "/:id/images/:publicId",
+  authenticate,
+  authorize("HOST", "ADMIN", "SUPER_ADMIN"),
+  hostelController.deleteHostelImage
+);
+
 module.exports = router;

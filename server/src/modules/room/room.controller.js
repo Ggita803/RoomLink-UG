@@ -374,6 +374,32 @@ const checkAvailability = asyncHandler(async (req, res) => {
   );
 });
 
+/**
+ * Get all rooms for a specific hostel
+ * GET /api/v1/hostels/:hostelId/rooms
+ */
+const getHostelRooms = asyncHandler(async (req, res) => {
+  const { hostelId } = req.params;
+  const rooms = await Room.find({ hostel: hostelId });
+  res.json(new ApiResponse(200, rooms, "Rooms fetched successfully"));
+});
+
+/**
+ * Update room availability
+ * PATCH /api/v1/hostels/:hostelId/rooms/:roomId/availability
+ */
+const updateRoomAvailability = asyncHandler(async (req, res) => {
+  const { hostelId, roomId } = req.params;
+  const { availableRooms } = req.body;
+  const room = await Room.findOneAndUpdate(
+    { _id: roomId, hostel: hostelId },
+    { availableRooms },
+    { new: true }
+  );
+  if (!room) throw new ApiError(404, "Room not found");
+  res.json(new ApiResponse(200, room, "Room availability updated"));
+});
+
 module.exports = {
   createRoom,
   getRooms,
@@ -381,4 +407,6 @@ module.exports = {
   updateRoom,
   deleteRoom,
   checkAvailability,
+  getHostelRooms,
+  updateRoomAvailability,
 };

@@ -289,14 +289,105 @@ const getHostelAnalytics = asyncHandler(async (req, res) => {
   );
 });
 
-module.exports = {
-  createHostel,
-  getHostels,
-  getHostelById,
-  updateHostel,
-  deleteHostel,
-  getHostelAnalytics,
-};
+/**
+ * List all available amenities (static list)
+ * GET /api/v1/hostels/amenities
+ */
+const getAmenities = asyncHandler(async (req, res) => {
+  const amenities = [
+    "WiFi",
+    "Parking",
+    "Kitchen",
+    "Laundry",
+    "Gym",
+    "Lounge",
+    "Garden",
+    "Security",
+    "CCTV",
+    "Hot Water",
+    "AC",
+    "Breakfast Included",
+    "Pet Friendly",
+    "Wheelchair Friendly",
+    "Library",
+    "Game Room",
+  ];
+  res.json(new ApiResponse(200, amenities, "Amenities list fetched successfully"));
+});
+
+/**
+ * Add an amenity to a hostel
+ * POST /api/v1/hostels/:id/amenities
+ */
+const addAmenityToHostel = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { amenity } = req.body;
+  if (!amenity) throw new ApiError(400, "Amenity is required");
+  const hostel = await Hostel.findByIdAndUpdate(
+    id,
+    { $addToSet: { amenities: amenity } },
+    { new: true }
+  );
+  if (!hostel) throw new ApiError(404, "Hostel not found");
+  res.json(new ApiResponse(200, hostel, "Amenity added to hostel"));
+});
+
+/**
+ * Remove an amenity from a hostel
+ * DELETE /api/v1/hostels/:id/amenities
+ */
+const removeAmenityFromHostel = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { amenity } = req.body;
+  if (!amenity) throw new ApiError(400, "Amenity is required");
+  const hostel = await Hostel.findByIdAndUpdate(
+    id,
+    { $pull: { amenities: amenity } },
+    { new: true }
+  );
+  if (!hostel) throw new ApiError(404, "Hostel not found");
+  res.json(new ApiResponse(200, hostel, "Amenity removed from hostel"));
+});
+
+/**
+ * Upload hostel images (add to existing images)
+ * POST /api/v1/hostels/:id/images
+ * Files: images (max 10)
+ */
+const uploadHostelImages = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  if (!req.files || !req.files.images) throw new ApiError(400, "No images uploaded");
+  const hostel = await Hostel.findById(id);
+  if (!hostel) throw new ApiError(404, "Hostel not found");
+  const imageFiles = Array.isArray(req.files.images) ? req.files.images : [req.files.images];
+  const uploadedImages = [];
+  for (const file of imageFiles.slice(0, 10)) {
+    const uploadedData = await uploadService.uploadFile(file, "hostels");
+    uploadedImages.push({
+      url: uploadedData.secure_url,
+      publicId: uploadedData.public_id,
+    });
+  }
+  hostel.images.push(...uploadedImages);
+  await hostel.save();
+  res.json(new ApiResponse(200, hostel.images, "Images uploaded successfully"));
+});
+
+/**
+ * Delete a hostel image by publicId
+ * DELETE /api/v1/hostels/:id/images/:publicId
+ */
+const deleteHostelImage = asyncHandler(async (req, res) => {
+  const { id, publicId } = req.params;
+  const hostel = await Hostel.findById(id);
+  if (!hostel) throw new ApiError(404, "Hostel not found");
+  // Remove from Cloudinary
+  await uploadService.deleteFile(publicId);
+  // Remove from DB
+  hostel.images = hostel.images.filter(img => img.publicId !== publicId);
+  await hostel.save();
+  res.json(new ApiResponse(200, hostel.images, "Image deleted successfully"));
+});
 
 module.exports = {
   createHostel,
@@ -304,4 +395,10 @@ module.exports = {
   getHostelById,
   updateHostel,
   deleteHostel,
+  getHostelAnalytics,
+  getAmenities,
+  addAmenityToHostel,
+  removeAmenityFromHostel,
+  uploadHostelImages,
+  deleteHostelImage,
 };
