@@ -5,6 +5,7 @@ const app = require("./src/app");
 const connectDB = require("./src/config/db");
 const { validateEnv, config } = require("./src/config/env");
 const logger = require("./src/config/logger");
+const { Server } = require("socket.io");
 
 // Validate environment variables at startup
 try {
@@ -22,9 +23,32 @@ connectDB().then(() => {
 
 // Create server
 const server = http.createServer(app);
-const PORT = config.app.port;
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || "*",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
+
+// Socket.IO basic setup
+io.on("connection", (socket) => {
+  logger.info(`🔌 Socket connected: ${socket.id}`);
+  // Example: join dashboard room
+  socket.on("joinDashboard", (role) => {
+    socket.join(role);
+    logger.info(`Socket ${socket.id} joined room: ${role}`);
+  });
+  socket.on("disconnect", () => {
+    logger.info(`🔌 Socket disconnected: ${socket.id}`);
+  });
+});
+
+// Make io available globally (for event emission in controllers)
+global.io = io;
 
 // Start server
+const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   logger.info(
     `🚀 Server running on http://localhost:${PORT} in ${config.app.env} mode`

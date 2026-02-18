@@ -104,15 +104,21 @@ const createRoom = asyncHandler(async (req, res) => {
 
   await room.populate("hostel", "name");
 
+  // Emit real-time event for new room (admin/host dashboards)
+  if (global.io) {
+    global.io.to("admin").emit("newRoom", room);
+    global.io.to("host").emit("newRoom", room);
+  }
+
   return res.status(201).json(
     new ApiResponse(201, room, "Room created successfully")
   );
 });
 
 /**
- * READ ALL - Get all rooms with filtering
+ * READ ALL - Get all rooms with advanced filtering, pagination, sorting
  * GET /api/v1/rooms
- * Query: page, limit, hostel, roomType, minPrice, maxPrice, capacity, status
+ * Query: page, limit, hostel, roomType, minPrice, maxPrice, capacity, status, amenities, search, sort
  */
 const getRooms = asyncHandler(async (req, res) => {
   const {
@@ -124,6 +130,9 @@ const getRooms = asyncHandler(async (req, res) => {
     maxPrice,
     capacity,
     status = "Active",
+    amenities,
+    search,
+    sort = "-createdAt"
   } = req.query;
 
   const skip = (page - 1) * limit;
@@ -132,19 +141,39 @@ const getRooms = asyncHandler(async (req, res) => {
   if (hostel) filter.hostel = hostel;
   if (roomType) filter.roomType = roomType;
   if (capacity) filter.capacity = { $gte: parseInt(capacity) };
-
   if (minPrice || maxPrice) {
     filter.pricePerNight = {};
     if (minPrice) filter.pricePerNight.$gte = parseFloat(minPrice);
     if (maxPrice) filter.pricePerNight.$lte = parseFloat(maxPrice);
   }
+  if (amenities) {
+    const amenitiesArr = Array.isArray(amenities) ? amenities : amenities.split(",");
+    filter.amenities = { $all: amenitiesArr };
+  }
+
+  // Text search if provided
+  let query = Room.find(filter);
+  if (search) {
+    query = Room.find(
+      { $text: { $search: search }, ...filter },
+      { score: { $meta: "textScore" } }
+    ).sort({ score: { $meta: "textScore" } });
+  } else {
+    // Flexible sorting
+    const sortObj = {};
+    const sortFields = sort.split(",");
+    for (const field of sortFields) {
+      if (field.startsWith("-")) sortObj[field.substring(1)] = -1;
+      else sortObj[field] = 1;
+    }
+    query = query.sort(sortObj);
+  }
 
   const total = await Room.countDocuments(filter);
-  const rooms = await Room.find(filter)
+  const rooms = await query
     .skip(skip)
     .limit(parseInt(limit))
-    .populate("hostel", "name address")
-    .sort({ createdAt: -1 });
+    .populate("hostel", "name address");
 
   return res.status(200).json(
     new ApiResponse(

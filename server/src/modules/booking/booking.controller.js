@@ -7,6 +7,8 @@ const Hostel = require("../hostel/hostel.model");
 const User = require("../user/user.model");
 const notificationService = require("../../services/notificationService");
 const logger = require("../../config/logger");
+const { Parser } = require('json2csv');
+const PDFDocument = require('pdfkit');
 
 /**
  * CREATE - Create new booking
@@ -81,51 +83,22 @@ const createBooking = asyncHandler(async (req, res) => {
 
   // Create booking
   const booking = await Booking.create({
+    ...req.body,
     user: req.user._id,
-    hostel: hostelData._id,
-    room: room,
-    checkInDate: checkIn,
-    checkOutDate: checkOut,
-    numberOfGuests,
-    numberOfRooms: numberOfRooms || 1,
-    guestDetails,
-    pricing: {
-      pricePerNight: roomData.pricePerNight,
-      numberOfNights: nights,
-      subtotal,
-      discountApplied,
-      discountAmount,
-      serviceFee,
-      taxAmount,
-      totalPrice,
-    },
-    payment: {
-      method: payment.method || "M-Pesa",
-      status: "Pending",
-      phoneNumber: payment.phoneNumber,
-    },
-    specialRequests,
-    bookingStatus: "Confirmed",
+    status: "pending",
+    createdAt: new Date(),
   });
 
-  await booking.populate([
-    { path: "user", select: "name email phone" },
-    { path: "hostel", select: "name address" },
-    { path: "room", select: "roomNumber roomType" },
-  ]);
+  await booking.populate("user", "name email").populate("hostel", "name");
 
-  // Send confirmation email asynchronously (non-blocking)
-  notificationService.sendBookingConfirmation(booking._id).catch((err) => {
-    logger.error("Failed to send booking confirmation:", err.message);
-  });
-
-  // Alert hostel owner
-  notificationService.sendHostelNewBookingAlert(booking._id).catch((err) => {
-    logger.error("Failed to send hostel booking alert:", err.message);
-  });
+  // Emit real-time event for new booking (admin/host dashboards)
+  if (global.io) {
+    global.io.to("admin").emit("newBooking", booking);
+    global.io.to("host").emit("newBooking", booking);
+  }
 
   return res.status(201).json(
-    new ApiResponse(201, booking, "Booking created successfully. Confirmation email sent.")
+    new ApiResponse(201, booking, "Booking created successfully")
   );
 });
 
@@ -418,6 +391,55 @@ const checkOut = asyncHandler(async (req, res) => {
   );
 });
 
+/**
+ * EXPORT - Download bookings as CSV or PDF
+ * GET /api/v1/bookings/export?format=csv|pdf
+ */
+const exportBookings = asyncHandler(async (req, res) => {
+  const { format = 'csv' } = req.query;
+  const bookings = await Booking.find().populate('user', 'name email').populate('hostel', 'name');
+  if (format === 'csv') {
+    const fields = [
+      { label: 'Booking ID', value: '_id' },
+      { label: 'User', value: 'user.name' },
+      { label: 'User Email', value: 'user.email' },
+      { label: 'Hostel', value: 'hostel.name' },
+      { label: 'Check In', value: 'checkInDate' },
+      { label: 'Check Out', value: 'checkOutDate' },
+      { label: 'Status', value: 'status' },
+      { label: 'Total Price', value: 'totalPrice' },
+      { label: 'Created At', value: 'createdAt' },
+    ];
+    const parser = new Parser({ fields });
+    const csv = parser.parse(bookings.map(b => b.toObject()));
+    res.header('Content-Type', 'text/csv');
+    res.attachment('bookings.csv');
+    return res.send(csv);
+  } else if (format === 'pdf') {
+    res.header('Content-Type', 'application/pdf');
+    res.attachment('bookings.pdf');
+    const doc = new PDFDocument({ margin: 30, size: 'A4' });
+    doc.pipe(res);
+    doc.fontSize(18).text('Bookings Report', { align: 'center' });
+    doc.moveDown();
+    bookings.forEach((b, i) => {
+      doc.fontSize(12).text(`Booking #${i + 1}`);
+      doc.text(`Booking ID: ${b._id}`);
+      doc.text(`User: ${b.user?.name || ''} (${b.user?.email || ''})`);
+      doc.text(`Hostel: ${b.hostel?.name || ''}`);
+      doc.text(`Check In: ${b.checkInDate}`);
+      doc.text(`Check Out: ${b.checkOutDate}`);
+      doc.text(`Status: ${b.status}`);
+      doc.text(`Total Price: ${b.totalPrice}`);
+      doc.text(`Created At: ${b.createdAt}`);
+      doc.moveDown();
+    });
+    doc.end();
+    return;
+  }
+  res.status(400).json(new ApiError(400, 'Unsupported export format'));
+});
+
 module.exports = {
   createBooking,
   getBookings,
@@ -426,4 +448,5 @@ module.exports = {
   cancelBooking,
   checkIn,
   checkOut,
+  exportBookings,
 };

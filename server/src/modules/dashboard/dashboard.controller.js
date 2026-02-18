@@ -19,46 +19,59 @@ const logger = require("../../config/logger");
  * Returns platform-wide metrics and statistics
  */
 const getAdminDashboard = asyncHandler(async (req, res) => {
-  // Count total users by role
+  const { startDate, endDate } = req.query;
+  // Build date filter
+  let dateFilter = {};
+  if (startDate || endDate) {
+    dateFilter.createdAt = {};
+    if (startDate) dateFilter.createdAt.$gte = new Date(startDate);
+    if (endDate) dateFilter.createdAt.$lte = new Date(endDate);
+  }
+
+  // Users
   const userStats = await User.aggregate([
-    {
-      $group: {
-        _id: "$role",
-        count: { $sum: 1 },
-      },
-    },
+    { $match: dateFilter },
+    { $group: { _id: "$role", count: { $sum: 1 } } },
   ]);
+  const totalUsers = await User.countDocuments(dateFilter);
 
-  const totalUsers = await User.countDocuments();
+  // Hostels (no date filter)
   const totalHostels = await Hostel.countDocuments();
-  const totalBookings = await Booking.countDocuments();
 
-  // Count bookings by status
+  // Bookings
+  const totalBookings = await Booking.countDocuments(dateFilter);
   const bookingStats = await Booking.aggregate([
-    {
-      $group: {
-        _id: "$status",
-        count: { $sum: 1 },
-      },
-    },
+    { $match: dateFilter },
+    { $group: { _id: "$status", count: { $sum: 1 } } },
+  ]);
+  // Monthly bookings trend
+  const monthlyBookings = await Booking.aggregate([
+    { $match: dateFilter },
+    { $group: {
+      _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+      count: { $sum: 1 },
+    } },
+    { $sort: { "_id.year": 1, "_id.month": 1 } },
   ]);
 
-  // Open complaints
-  const openComplaints = await Complaint.countDocuments({ status: "open" });
-  const highPriorityComplaints = await Complaint.countDocuments({ status: "open", priority: "high" });
+  // Complaints
+  const openComplaints = await Complaint.countDocuments({ ...dateFilter, status: "open" });
+  const highPriorityComplaints = await Complaint.countDocuments({ ...dateFilter, status: "open", priority: "high" });
 
-  // Revenue calculation
+  // Revenue
   const payments = await Payment.aggregate([
-    {
-      $match: { status: "completed" },
-    },
-    {
-      $group: {
-        _id: null,
-        totalRevenue: { $sum: "$amount" },
-        totalTransactions: { $sum: 1 },
-      },
-    },
+    { $match: { ...dateFilter, status: "completed" } },
+    { $group: { _id: null, totalRevenue: { $sum: "$amount" }, totalTransactions: { $sum: 1 } } },
+  ]);
+  // Monthly revenue trend
+  const monthlyRevenue = await Payment.aggregate([
+    { $match: { ...dateFilter, status: "completed" } },
+    { $group: {
+      _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+      revenue: { $sum: "$amount" },
+      transactions: { $sum: 1 },
+    } },
+    { $sort: { "_id.year": 1, "_id.month": 1 } },
   ]);
 
   // Recent bookings
@@ -98,8 +111,11 @@ const getAdminDashboard = asyncHandler(async (req, res) => {
     bookings: {
       byStatus: bookingStats,
       total: totalBookings,
-      recentCount: 5,
-      recentBookings,
+      monthlyTrend: monthlyBookings,
+    },
+    revenue: {
+      monthlyTrend: monthlyRevenue,
+      total: payments[0]?.totalRevenue || 0,
     },
     complaints: {
       openCount: openComplaints,
@@ -120,15 +136,20 @@ const getAdminDashboard = asyncHandler(async (req, res) => {
 });
 
 /**
- * GET - Host Dashboard
- * Returns metrics for a specific hostel owner
+ * GET - Host Dashboard with date filters and trends
+ * GET /api/v1/dashboard/host?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
  */
 const getHostDashboard = asyncHandler(async (req, res) => {
+  const { startDate, endDate } = req.query;
   const hostId = req.user._id;
-
+  let dateFilter = {};
+  if (startDate || endDate) {
+    dateFilter.createdAt = {};
+    if (startDate) dateFilter.createdAt.$gte = new Date(startDate);
+    if (endDate) dateFilter.createdAt.$lte = new Date(endDate);
+  }
   // Get all hostels for this host
   const hostels = await Hostel.find({ owner: hostId }).select("_id name totalReviews averageRating");
-
   if (hostels.length === 0) {
     return res.status(200).json(
       new ApiResponse(200, {
@@ -141,169 +162,130 @@ const getHostDashboard = asyncHandler(async (req, res) => {
       }, "No hostels found for this host")
     );
   }
-
   const hostelIds = hostels.map((h) => h._id);
-
-  // Count bookings for these hostels
-  const totalBookings = await Booking.countDocuments({ hostel: { $in: hostelIds } });
-
-  // Get booking stats
+  // Bookings
+  const totalBookings = await Booking.countDocuments({ hostel: { $in: hostelIds }, ...dateFilter });
   const bookingStats = await Booking.aggregate([
-    { $match: { hostel: { $in: hostelIds } } },
-    {
-      $group: {
-        _id: "$status",
-        count: { $sum: 1 },
-      },
-    },
+    { $match: { hostel: { $in: hostelIds }, ...dateFilter } },
+    { $group: { _id: "$status", count: { $sum: 1 } } },
   ]);
-
-  // Calculate revenue from bookings
+  // Monthly bookings trend
+  const monthlyBookings = await Booking.aggregate([
+    { $match: { hostel: { $in: hostelIds }, ...dateFilter } },
+    { $group: {
+      _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+      count: { $sum: 1 },
+    } },
+    { $sort: { "_id.year": 1, "_id.month": 1 } },
+  ]);
+  // Revenue
   const revenueData = await Booking.aggregate([
-    {
-      $match: { hostel: { $in: hostelIds }, status: { $in: ["completed", "checked_out"] } },
-    },
-    {
-      $group: {
-        _id: null,
-        totalRevenue: { $sum: "$totalPrice" },
-      },
-    },
+    { $match: { hostel: { $in: hostelIds }, status: { $in: ["completed", "checked_out"] }, ...dateFilter } },
+    { $group: { _id: null, totalRevenue: { $sum: "$totalPrice" } } },
   ]);
-
-  // Get complaints for these hostels
-  const totalComplaints = await Complaint.countDocuments({
-    hostel: { $in: hostelIds },
-  });
-
-  const openComplaints = await Complaint.countDocuments({
-    hostel: { $in: hostelIds },
-    status: "open",
-  });
-
-  // Calculate overall occupancy rate
+  // Monthly revenue trend
+  const monthlyRevenue = await Booking.aggregate([
+    { $match: { hostel: { $in: hostelIds }, status: { $in: ["completed", "checked_out"] }, ...dateFilter } },
+    { $group: {
+      _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+      revenue: { $sum: "$totalPrice" },
+    } },
+    { $sort: { "_id.year": 1, "_id.month": 1 } },
+  ]);
+  // Complaints
+  const totalComplaints = await Complaint.countDocuments({ hostel: { $in: hostelIds }, ...dateFilter });
+  const openComplaints = await Complaint.countDocuments({ hostel: { $in: hostelIds }, status: "open", ...dateFilter });
+  // Reviews
   const totalReviews = hostels.reduce((sum, h) => sum + (h.totalReviews || 0), 0);
   const avgRating = hostels.reduce((sum, h) => sum + h.averageRating, 0) / hostels.length || 0;
-
-  // Recent complaints
-  const recentComplaints = await Complaint.find({ hostel: { $in: hostelIds } })
-    .sort({ createdAt: -1 })
-    .limit(5)
-    .populate("user", "name")
-    .select("_id title category priority status createdAt");
-
   const dashboard = {
     hostels: hostels.length,
     bookings: {
       total: totalBookings,
       byStatus: bookingStats,
+      monthlyTrend: monthlyBookings,
     },
-    revenue: revenueData[0]?.totalRevenue || 0,
+    revenue: {
+      total: revenueData[0]?.totalRevenue || 0,
+      monthlyTrend: monthlyRevenue,
+    },
     complaints: {
       total: totalComplaints,
       open: openComplaints,
-      recent: recentComplaints,
     },
     reviews: {
       total: totalReviews,
       avgRating: parseFloat(avgRating.toFixed(2)),
     },
   };
-
   logger.info(`Host dashboard accessed by ${hostId}`);
-
   return res.status(200).json(
     new ApiResponse(200, dashboard, "Host dashboard retrieved successfully")
   );
 });
 
 /**
- * GET - Staff Dashboard
- * Returns complaint management metrics for staff
+ * GET - Staff Dashboard with date filters and trends
+ * GET /api/v1/dashboard/staff?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
  */
 const getStaffDashboard = asyncHandler(async (req, res) => {
+  const { startDate, endDate } = req.query;
   const staffId = req.user._id;
-
-  // Get complaints assigned to this staff member
-  const assignedComplaints = await Complaint.countDocuments({ handledBy: staffId });
-
-  // Open complaints assigned
-  const openAssigned = await Complaint.countDocuments({
-    handledBy: staffId,
-    status: "open",
-  });
-
-  // In-progress complaints
-  const inProgress = await Complaint.countDocuments({
-    handledBy: staffId,
-    status: "in-progress",
-  });
-
-  // Resolved complaints
-  const resolvedCount = await Complaint.countDocuments({
-    handledBy: staffId,
-    status: "resolved",
-  });
-
-  // Get complaint stats by category
+  let dateFilter = {};
+  if (startDate || endDate) {
+    dateFilter.createdAt = {};
+    if (startDate) dateFilter.createdAt.$gte = new Date(startDate);
+    if (endDate) dateFilter.createdAt.$lte = new Date(endDate);
+  }
+  // Complaints assigned to staff
+  const assignedComplaints = await Complaint.countDocuments({ handledBy: staffId, ...dateFilter });
+  const openAssigned = await Complaint.countDocuments({ handledBy: staffId, status: "open", ...dateFilter });
+  const inProgress = await Complaint.countDocuments({ handledBy: staffId, status: "in-progress", ...dateFilter });
+  const resolvedCount = await Complaint.countDocuments({ handledBy: staffId, status: "resolved", ...dateFilter });
+  // Complaints by category
   const complaintsByCategory = await Complaint.aggregate([
-    { $match: { handledBy: staffId } },
-    {
-      $group: {
-        _id: "$category",
-        count: { $sum: 1 },
-      },
-    },
+    { $match: { handledBy: staffId, ...dateFilter } },
+    { $group: { _id: "$category", count: { $sum: 1 } } },
   ]);
-
-  // Get complaint stats by priority
+  // Complaints by priority
   const complaintsByPriority = await Complaint.aggregate([
-    { $match: { handledBy: staffId } },
-    {
-      $group: {
-        _id: "$priority",
-        count: { $sum: 1 },
-      },
-    },
+    { $match: { handledBy: staffId, ...dateFilter } },
+    { $group: { _id: "$priority", count: { $sum: 1 } } },
   ]);
-
-  // Calculate average resolution time (in days)
+  // Resolution time metrics
   const resolutionMetrics = await Complaint.aggregate([
-    {
-      $match: {
-        handledBy: staffId,
-        status: "resolved",
-        resolutionDate: { $exists: true },
+    { $match: { handledBy: staffId, status: "resolved", resolutionDate: { $exists: true }, ...dateFilter } },
+    { $project: {
+      resolutionTime: {
+        $divide: [
+          { $subtract: ["$resolutionDate", "$createdAt"] },
+          1000 * 60 * 60 * 24,
+        ],
       },
-    },
-    {
-      $project: {
-        resolutionTime: {
-          $divide: [
-            { $subtract: ["$resolutionDate", "$createdAt"] },
-            1000 * 60 * 60 * 24, // Convert to days
-          ],
-        },
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        avgResolutionTime: { $avg: "$resolutionTime" },
-        minResolutionTime: { $min: "$resolutionTime" },
-        maxResolutionTime: { $max: "$resolutionTime" },
-      },
-    },
+    } },
+    { $group: {
+      _id: null,
+      avgResolutionTime: { $avg: "$resolutionTime" },
+      minResolutionTime: { $min: "$resolutionTime" },
+      maxResolutionTime: { $max: "$resolutionTime" },
+    } },
   ]);
-
-  // Get recent complaints assigned to staff
-  const recentComplaints = await Complaint.find({ handledBy: staffId })
+  // Monthly complaints trend
+  const monthlyComplaints = await Complaint.aggregate([
+    { $match: { handledBy: staffId, ...dateFilter } },
+    { $group: {
+      _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+      count: { $sum: 1 },
+    } },
+    { $sort: { "_id.year": 1, "_id.month": 1 } },
+  ]);
+  // Recent complaints
+  const recentComplaints = await Complaint.find({ handledBy: staffId, ...dateFilter })
     .sort({ createdAt: -1 })
     .limit(5)
     .populate("user", "name")
     .populate("hostel", "name")
     .select("_id title category priority status createdAt");
-
   const dashboard = {
     assigned: assignedComplaints,
     status: {
@@ -318,11 +300,10 @@ const getStaffDashboard = asyncHandler(async (req, res) => {
       minResolutionTime: resolutionMetrics[0]?.minResolutionTime || 0,
       maxResolutionTime: resolutionMetrics[0]?.maxResolutionTime || 0,
     },
+    monthlyTrend: monthlyComplaints,
     recent: recentComplaints,
   };
-
   logger.info(`Staff dashboard accessed by ${staffId}`);
-
   return res.status(200).json(
     new ApiResponse(200, dashboard, "Staff dashboard retrieved successfully")
   );

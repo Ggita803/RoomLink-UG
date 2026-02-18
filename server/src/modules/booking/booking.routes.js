@@ -40,4 +40,11 @@ router.post(
   bookingController.checkOut
 );
 
+router.get(
+  "/export",
+  authenticate,
+  authorize("ADMIN", "SUPER_ADMIN"),
+  bookingController.exportBookings
+);
+
 module.exports = router;

@@ -59,6 +59,12 @@ const initiatePayment = asyncHandler(async (req, res) => {
     payment.transactionId = stkResponse.checkoutRequestId;
     await payment.save();
 
+    // Emit real-time event for new payment (admin/staff dashboards)
+    if (global.io) {
+      global.io.to("admin").emit("newPayment", payment);
+      global.io.to("staff").emit("newPayment", payment);
+    }
+
     logger.info(`Payment initiated: ${payment._id} - ${amount} KES`);
 
     return res.status(200).json(
@@ -296,6 +302,12 @@ const requestRefund = asyncHandler(async (req, res) => {
     payment.refundReason = reason;
     payment.refundRequestedAt = new Date();
     await payment.save();
+
+    // Emit real-time event for refund request (admin/staff dashboards)
+    if (global.io) {
+      global.io.to("admin").emit("refundRequested", payment);
+      global.io.to("staff").emit("refundRequested", payment);
+    }
 
     logger.info(`Refund requested: ${payment._id} - Reason: ${reason}`);
 

@@ -107,6 +107,12 @@ const createComplaint = asyncHandler(async (req, res) => {
     { path: "booking", select: "checkInDate checkOutDate" },
   ]);
 
+  // Emit real-time event for new complaint (admin/staff dashboards)
+  if (global.io) {
+    global.io.to("admin").emit("newComplaint", complaint);
+    global.io.to("staff").emit("newComplaint", complaint);
+  }
+
   // Send acknowledgment email
   try {
     const user = await User.findById(userId);

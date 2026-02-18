@@ -81,22 +81,41 @@ const createHostel = asyncHandler(async (req, res) => {
 });
 
 /**
- * READ ALL - Get all hostels with filtering, pagination, sorting
+ * READ ALL - Get all hostels with advanced filtering, pagination, sorting
  * GET /api/v1/hostels
- * Query: page, limit, city, minRating, search, status
+ * Query: page, limit, city, minRating, status, search, country, owner, minPrice, maxPrice, amenities, sort
  */
 const getHostels = asyncHandler(async (req, res) => {
-  const { page = 1, limit = 10, city, minRating, status = "Active", search } = req.query;
+  const {
+    page = 1,
+    limit = 10,
+    city,
+    minRating,
+    status = "Active",
+    search,
+    country,
+    owner,
+    minPrice,
+    maxPrice,
+    amenities,
+    sort = "-createdAt"
+  } = req.query;
 
   const skip = (page - 1) * limit;
   const filter = { accountStatus: status };
 
-  if (city) {
-    filter["address.city"] = { $regex: city, $options: "i" };
+  if (city) filter["address.city"] = { $regex: city, $options: "i" };
+  if (country) filter["address.country"] = { $regex: country, $options: "i" };
+  if (owner) filter.owner = owner;
+  if (minRating) filter.averageRating = { $gte: parseFloat(minRating) };
+  if (minPrice || maxPrice) {
+    filter.pricePerNight = {};
+    if (minPrice) filter.pricePerNight.$gte = parseFloat(minPrice);
+    if (maxPrice) filter.pricePerNight.$lte = parseFloat(maxPrice);
   }
-
-  if (minRating) {
-    filter.averageRating = { $gte: parseFloat(minRating) };
+  if (amenities) {
+    const amenitiesArr = Array.isArray(amenities) ? amenities : amenities.split(",");
+    filter.amenities = { $all: amenitiesArr };
   }
 
   // Text search if provided
@@ -106,14 +125,22 @@ const getHostels = asyncHandler(async (req, res) => {
       { $text: { $search: search }, ...filter },
       { score: { $meta: "textScore" } }
     ).sort({ score: { $meta: "textScore" } });
+  } else {
+    // Flexible sorting
+    const sortObj = {};
+    const sortFields = sort.split(",");
+    for (const field of sortFields) {
+      if (field.startsWith("-")) sortObj[field.substring(1)] = -1;
+      else sortObj[field] = 1;
+    }
+    query = query.sort(sortObj);
   }
 
   const total = await Hostel.countDocuments(filter);
   const hostels = await query
     .skip(skip)
     .limit(parseInt(limit))
-    .populate("owner", "name email phone")
-    .sort({ createdAt: -1 });
+    .populate("owner", "name email phone");
 
   return res.status(200).json(
     new ApiResponse(200, {
