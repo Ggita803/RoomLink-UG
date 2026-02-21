@@ -8,6 +8,9 @@ import HostelDetail from './pages/HostelDetail'
 import Booking from './pages/Booking'
 import Login from './pages/Auth/Login'
 import Register from './pages/Auth/Register'
+import ForgotPassword from './pages/Auth/ForgotPassword'
+import VerifyEmail from './pages/Auth/VerifyEmail'
+import ResetPassword from './pages/Auth/ResetPassword'
 import Dashboard from './pages/Dashboard'
 
 function App() {
@@ -23,6 +26,9 @@ function App() {
             <Route path="/booking/:roomId" element={<Booking />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </main>

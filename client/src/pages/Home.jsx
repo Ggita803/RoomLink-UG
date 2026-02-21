@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Search, Shield, Globe, Users } from 'lucide-react'
+import { Search, Shield, Globe, Users, ArrowRight } from 'lucide-react'
 import SearchBar from '../components/SearchBar'
 import HostelCard from '../components/HostelCard'
 import api from '../config/api'
@@ -108,15 +108,20 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-red-500 to-red-600 text-white py-16">
-        <div className="container-max text-center">
-          <h2 className="text-4xl font-bold mb-4">Become a Host</h2>
-          <p className="text-xl text-red-100 mb-8">
-            Share your space and earn money hosting travelers
-          </p>
-          <button className="bg-white text-red-500 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors">
-            Get Started
-          </button>
+      <section className="py-16 px-4">
+        <div className="container-max">
+          <div className="bg-gradient-to-r from-red-500 to-red-600 text-white py-16 px-8 rounded-2xl shadow-xl">
+            <div className="max-w-3xl mx-auto text-center">
+              <h2 className="text-4xl font-bold mb-4">Become a Host</h2>
+              <p className="text-xl text-red-100 mb-8">
+                Share your space and earn money hosting travelers
+              </p>
+              <button className="bg-white text-red-500 px-8 py-3 rounded-full font-bold hover:bg-gray-100 hover:shadow-lg transition-all inline-flex items-center gap-2">
+                Get Started
+                <ArrowRight size={20} />
+              </button>
+            </div>
+          </div>
         </div>
       </section>
     </div>

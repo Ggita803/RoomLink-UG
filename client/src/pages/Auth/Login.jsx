@@ -87,7 +87,7 @@ export default function Login() {
               <input type="checkbox" className="mr-2" />
               Remember me
             </label>
-            <Link to="#" className="text-sm text-red-500 hover:text-red-600">
+            <Link to="/forgot-password" className="text-sm text-red-500 hover:text-red-600">
               Forgot password?
             </Link>
           </div>
@@ -114,10 +114,12 @@ export default function Login() {
 
         {/* OAuth Buttons */}
         <div className="space-y-3">
-          <button className="w-full btn-secondary py-2">
+          <button className="w-full btn-secondary py-2 flex items-center justify-center gap-2 font-semibold">
+            <i className="fab fa-google text-lg"></i>
             Continue with Google
           </button>
-          <button className="w-full btn-secondary py-2">
+          <button className="w-full btn-secondary py-2 flex items-center justify-center gap-2 font-semibold">
+            <i className="fab fa-facebook-f text-lg"></i>
             Continue with Facebook
           </button>
         </div>
