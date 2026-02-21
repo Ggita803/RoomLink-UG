@@ -38,7 +38,7 @@ export default function SearchBar() {
           placeholder="Where are you going?"
           value={city}
           onChange={(e) => setCity(e.target.value)}
-          className="w-full outline-none text-sm font-medium"
+          className="w-full outline-none text-sm font-medium text-gray-900 bg-transparent placeholder-gray-500"
         />
       </div>
 
@@ -49,7 +49,7 @@ export default function SearchBar() {
           type="date"
           value={checkIn}
           onChange={(e) => setCheckIn(e.target.value)}
-          className="w-full outline-none text-sm font-medium"
+          className="w-full outline-none text-sm font-medium text-gray-900 bg-transparent placeholder-gray-500"
         />
       </div>
 
@@ -60,7 +60,7 @@ export default function SearchBar() {
           type="date"
           value={checkOut}
           onChange={(e) => setCheckOut(e.target.value)}
-          className="w-full outline-none text-sm font-medium"
+          className="w-full outline-none text-sm font-medium text-gray-900 bg-transparent placeholder-gray-500"
         />
       </div>
 
@@ -73,7 +73,7 @@ export default function SearchBar() {
           max="10"
           value={guests}
           onChange={(e) => setGuests(e.target.value)}
-          className="w-full outline-none text-sm font-medium"
+          className="w-full outline-none text-sm font-medium text-gray-900 bg-transparent placeholder-gray-500"
         />
       </div>
 

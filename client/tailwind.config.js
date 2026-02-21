@@ -12,9 +12,9 @@ export default {
         light: '#F7F7F7',
       },
       fontFamily: {
-        sans: ['Poppins', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['Poppins', 'system-ui', 'sans-serif'],
-        body: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Outfit', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Outfit', 'system-ui', 'sans-serif'],
+        body: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         xs: ['12px', '16px'],
