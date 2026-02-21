@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-feature-settings: "rlig" 1, "liga" 1;
+}
+
+body {
+  font-family: 'Poppins', 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #fafafa;
+  color: #222222;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.02em;
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-2 border border-gray-300 text-gray-900 rounded-lg font-semibold hover:border-gray-400 transition-colors;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow overflow-hidden;
+  }
+
+  .container-max {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Typography */
+  h1 {
+    @apply font-bold;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+
+  h2 {
+    @apply font-bold;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+
+  h3 {
+    @apply font-semibold;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+
+  p {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
