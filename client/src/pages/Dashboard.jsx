@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Bookmark, MapPin, Calendar, LayoutDashboard, Search, MessageSquare, User, Settings } from 'lucide-react'
+import { Bookmark, MapPin, Calendar, LayoutDashboard, Search, MessageSquare, User, Settings, Compass, Home as HomeIcon } from 'lucide-react'
 import useAuthStore from '../store/authStore'
 import api from '../config/api'
 import toast from 'react-hot-toast'
-import { DashboardLayout, StatsCard } from '../components/dashboard'
+import { DashboardLayout, StatsCard, WelcomeBanner } from '../components/dashboard'
 
 const sidebarItems = [
   { path: '/dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -46,12 +46,20 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="My Account">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold mb-1">Welcome, {user?.name}!</h1>
-          <p className="text-gray-600 text-sm">{user?.email}</p>
-        </div>
-      </div>
+      <WelcomeBanner
+        userName={user?.name}
+        role="user"
+        icon={HomeIcon}
+        stats={[
+          { label: 'Bookings', value: bookings.length },
+          { label: 'Active', value: activeBookings },
+          { label: 'Spent', value: `$${totalSpent.toLocaleString()}` },
+        ]}
+        actions={[
+          { label: 'Find Hostels', to: '/search', icon: Compass },
+          { label: 'My Profile', to: '/profile', icon: User },
+        ]}
+      />
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

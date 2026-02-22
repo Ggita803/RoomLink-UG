@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Building2, DollarSign, Star, Users, AlertCircle, TrendingUp, Plus, LayoutDashboard, CalendarDays, Settings } from 'lucide-react'
+import { Building2, DollarSign, Star, Users, AlertCircle, TrendingUp, Plus, LayoutDashboard, CalendarDays, Settings, Hotel } from 'lucide-react'
 import useAuthStore from '../store/authStore'
 import api from '../config/api'
 import toast from 'react-hot-toast'
-import { DashboardLayout, StatsCard } from '../components/dashboard'
+import { DashboardLayout, StatsCard, WelcomeBanner } from '../components/dashboard'
 
 const sidebarItems = [
   { path: '/host/dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -71,20 +71,20 @@ export default function HostDashboard() {
 
   return (
     <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Host Panel">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold mb-1">Host Dashboard</h1>
-          <p className="text-gray-600 text-sm">Welcome back, {user?.name}!</p>
-        </div>
-        <Link
-          to="/host/add-hostel"
-          className="flex items-center gap-2 btn-primary px-5 py-2.5"
-        >
-          <Plus size={18} />
-          Add Hostel
-        </Link>
-      </div>
+      <WelcomeBanner
+        userName={user?.name}
+        role="host"
+        icon={Hotel}
+        stats={[
+          { label: 'Properties', value: totalHostels },
+          { label: 'Revenue', value: `$${totalRevenue.toLocaleString()}` },
+          { label: 'Bookings', value: totalBookings },
+        ]}
+        actions={[
+          { label: 'Add New Hostel', to: '/host/add-hostel', icon: Plus },
+          { label: 'View Bookings', to: '/host/bookings', icon: CalendarDays },
+        ]}
+      />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

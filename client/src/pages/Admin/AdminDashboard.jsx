@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import {
   Users, Building2, CalendarDays, DollarSign, AlertTriangle,
   BarChart3, Shield, FileText,
-  LayoutDashboard, Settings,
+  LayoutDashboard, Settings, ShieldCheck,
 } from 'lucide-react'
-import { DashboardLayout, StatsCard } from '../../components/dashboard'
+import { DashboardLayout, StatsCard, WelcomeBanner } from '../../components/dashboard'
 import useAuthStore from '../../store/authStore'
 import api from '../../config/api'
 import toast from 'react-hot-toast'
@@ -64,10 +64,20 @@ export default function AdminDashboard() {
 
   return (
     <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Admin Panel">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">Platform overview and metrics</p>
-      </div>
+      <WelcomeBanner
+        userName={user?.name}
+        role="admin"
+        icon={ShieldCheck}
+        stats={[
+          { label: 'Users', value: stats.users?.total || 0 },
+          { label: 'Hostels', value: stats.hostels?.total || 0 },
+          { label: 'Revenue', value: `$${(stats.revenue?.total || 0).toLocaleString()}` },
+        ]}
+        actions={[
+          { label: 'View Reports', to: '/admin/reports', icon: BarChart3 },
+          { label: 'Manage Users', to: '/admin/users', icon: Users },
+        ]}
+      />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
