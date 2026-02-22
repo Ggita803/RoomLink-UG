@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { MapPin, Star, Wifi, Users, DollarSign, Heart } from 'lucide-react'
+import { MapPin, Star, Wifi, Users, DollarSign, Heart, Phone, MessageCircle } from 'lucide-react'
 import api from '../config/api'
 import toast from 'react-hot-toast'
 import useReviewStore from '../store/reviewStore'
@@ -14,6 +14,7 @@ export default function HostelDetail() {
   const [rooms, setRooms] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [saved, setSaved] = useState(false)
   const { user } = useAuthStore()
   const { reviews, fetchHostelReviews } = useReviewStore()
 
@@ -131,7 +132,7 @@ export default function HostelDetail() {
             </div>
 
             {/* Available Rooms */}
-            <div>
+            <div id="available-rooms">
               <h3 className="text-2xl font-bold mb-4">Available Rooms</h3>
               <div className="space-y-4">
                 {rooms.length > 0 ? (
@@ -193,23 +194,73 @@ export default function HostelDetail() {
                 </p>
               </div>
 
-              <button className="w-full btn-primary py-3 mb-3 font-semibold">
+              <button
+                onClick={() => {
+                  if (rooms.length > 0) {
+                    const roomsSection = document.getElementById('available-rooms')
+                    roomsSection?.scrollIntoView({ behavior: 'smooth' })
+                  } else {
+                    toast.error('No rooms available at this hostel')
+                  }
+                }}
+                className="w-full btn-primary py-3 mb-3 font-semibold"
+              >
                 Check Availability
               </button>
 
-              <button className="w-full btn-secondary py-3 flex items-center justify-center gap-2 font-semibold">
-                <Heart size={20} />
-                Save
+              <button
+                onClick={() => {
+                  if (!user) {
+                    toast.error('Please login to save hostels')
+                    navigate('/login')
+                    return
+                  }
+                  setSaved(!saved)
+                  toast.success(saved ? 'Removed from saved' : 'Saved to favorites!')
+                }}
+                className={`w-full py-3 flex items-center justify-center gap-2 font-semibold rounded-lg border transition-colors ${
+                  saved
+                    ? 'bg-red-50 border-red-300 text-red-600'
+                    : 'btn-secondary'
+                }`}
+              >
+                <Heart size={20} className={saved ? 'fill-red-500' : ''} />
+                {saved ? 'Saved' : 'Save'}
               </button>
 
               {/* Contact Info */}
               <div className="mt-8 pt-6 border-t border-gray-200">
                 <h4 className="font-bold mb-3">Contact Host</h4>
-                <button className="w-full bg-gray-100 py-2 rounded-lg mb-2 text-sm font-semibold hover:bg-gray-200">
+                <button
+                  onClick={() => {
+                    if (!user) {
+                      toast.error('Please login to message the host')
+                      navigate('/login')
+                      return
+                    }
+                    if (hostel.contactEmail) {
+                      window.location.href = `mailto:${hostel.contactEmail}?subject=Inquiry about ${hostel.name}`
+                    } else {
+                      toast('Messaging feature coming soon', { icon: '📧' })
+                    }
+                  }}
+                  className="w-full bg-gray-100 py-2 rounded-lg mb-2 text-sm font-semibold hover:bg-gray-200 flex items-center justify-center gap-2"
+                >
+                  <MessageCircle size={16} />
                   Message Host
                 </button>
-                <button className="w-full bg-gray-100 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200">
-                  Call Host
+                <button
+                  onClick={() => {
+                    if (hostel.contactPhone) {
+                      window.location.href = `tel:${hostel.contactPhone}`
+                    } else {
+                      toast('Phone number not available', { icon: '📞' })
+                    }
+                  }}
+                  className="w-full bg-gray-100 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 flex items-center justify-center gap-2"
+                >
+                  <Phone size={16} />
+                  {hostel.contactPhone || 'Call Host'}
                 </button>
               </div>
             </div>

@@ -1,13 +1,24 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { LogOut, Building2, DollarSign, Star, Users, AlertCircle, TrendingUp, Plus } from 'lucide-react'
+import { Building2, DollarSign, Star, Users, AlertCircle, TrendingUp, Plus, LayoutDashboard, CalendarDays, Settings } from 'lucide-react'
 import useAuthStore from '../store/authStore'
 import api from '../config/api'
 import toast from 'react-hot-toast'
+import { DashboardLayout, StatsCard } from '../components/dashboard'
+
+const sidebarItems = [
+  { path: '/host/dashboard', label: 'Overview', icon: LayoutDashboard },
+  { divider: true, label: 'Management' },
+  { path: '/host/hostels', label: 'My Hostels', icon: Building2 },
+  { path: '/host/bookings', label: 'Bookings', icon: CalendarDays },
+  { path: '/host/reviews', label: 'Reviews', icon: Star },
+  { divider: true, label: 'Account' },
+  { path: '/profile', label: 'Settings', icon: Settings },
+]
 
 export default function HostDashboard() {
   const navigate = useNavigate()
-  const { user, logout } = useAuthStore()
+  const { user } = useAuthStore()
   const [dashboard, setDashboard] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -35,16 +46,13 @@ export default function HostDashboard() {
     fetchDashboard()
   }, [user, navigate])
 
-  const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-gray-300 border-t-red-500 rounded-full animate-spin"></div>
-      </div>
+      <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Host Panel">
+        <div className="flex items-center justify-center py-20">
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-red-500 rounded-full animate-spin"></div>
+        </div>
+      </DashboardLayout>
     )
   }
 
@@ -62,74 +70,29 @@ export default function HostDashboard() {
   }, {})
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container-max py-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-1">Host Dashboard</h1>
-            <p className="text-gray-600">Welcome back, {user?.name}!</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link
-              to="/host/add-hostel"
-              className="flex items-center gap-2 btn-primary px-5 py-2.5"
-            >
-              <Plus size={18} />
-              Add Hostel
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-5 py-2.5 border border-red-500 text-red-500 rounded-lg font-semibold hover:bg-red-50 transition-colors"
-            >
-              <LogOut size={18} />
-              Logout
-            </button>
-          </div>
+    <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Host Panel">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold mb-1">Host Dashboard</h1>
+          <p className="text-gray-600 text-sm">Welcome back, {user?.name}!</p>
         </div>
+        <Link
+          to="/host/add-hostel"
+          className="flex items-center gap-2 btn-primary px-5 py-2.5"
+        >
+          <Plus size={18} />
+          Add Hostel
+        </Link>
+      </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Building2 size={20} className="text-blue-600" />
-              </div>
-              <span className="text-gray-600 text-sm font-medium">My Hostels</span>
-            </div>
-            <p className="text-3xl font-bold">{totalHostels}</p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <DollarSign size={20} className="text-green-600" />
-              </div>
-              <span className="text-gray-600 text-sm font-medium">Total Revenue</span>
-            </div>
-            <p className="text-3xl font-bold">${totalRevenue.toLocaleString()}</p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Users size={20} className="text-purple-600" />
-              </div>
-              <span className="text-gray-600 text-sm font-medium">Total Bookings</span>
-            </div>
-            <p className="text-3xl font-bold">{totalBookings}</p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Star size={20} className="text-yellow-600" />
-              </div>
-              <span className="text-gray-600 text-sm font-medium">Avg Rating</span>
-            </div>
-            <p className="text-3xl font-bold">{avgRating} <span className="text-sm text-gray-500 font-normal">({totalReviews} reviews)</span></p>
-          </div>
-        </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <StatsCard title="My Hostels" value={totalHostels} icon={Building2} color="blue" />
+        <StatsCard title="Total Revenue" value={totalRevenue} icon={DollarSign} color="green" prefix="$" />
+        <StatsCard title="Total Bookings" value={totalBookings} icon={Users} color="purple" />
+        <StatsCard title="Avg Rating" value={`${avgRating} (${totalReviews})`} icon={Star} color="yellow" />
+      </div>
 
         {/* Booking Status + Complaints */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -208,7 +171,6 @@ export default function HostDashboard() {
             </Link>
           </div>
         )}
-      </div>
-    </div>
+    </DashboardLayout>
   )
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Users, Building2, CalendarDays, DollarSign, AlertTriangle,
@@ -6,10 +6,14 @@ import {
   LayoutDashboard, Settings,
 } from 'lucide-react'
 import { DashboardLayout, StatsCard } from '../../components/dashboard'
-import { RevenueChart, BookingsChart, StatusPieChart } from '../../components/dashboard'
 import useAuthStore from '../../store/authStore'
 import api from '../../config/api'
 import toast from 'react-hot-toast'
+
+// Lazy-load individual charts (Recharts is large)
+const RevenueChart = lazy(() => import('../../components/dashboard/Charts').then(m => ({ default: m.RevenueChart })))
+const BookingsChart = lazy(() => import('../../components/dashboard/Charts').then(m => ({ default: m.BookingsChart })))
+const StatusPieChart = lazy(() => import('../../components/dashboard/Charts').then(m => ({ default: m.StatusPieChart })))
 
 const sidebarItems = [
   { path: '/admin/dashboard', label: 'Overview', icon: LayoutDashboard },
@@ -101,45 +105,54 @@ export default function AdminDashboard() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-          <h3 className="text-base font-bold text-gray-900 mb-4">Revenue Trend</h3>
-          <RevenueChart data={stats.revenueChart || []} />
+      <Suspense fallback={
+        <div className="space-y-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 h-64 animate-pulse" />
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 h-64 animate-pulse" />
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 h-64 animate-pulse" />
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-          <h3 className="text-base font-bold text-gray-900 mb-4">Booking Trend</h3>
-          <BookingsChart data={stats.bookingsChart || []} />
+      }>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <h3 className="text-base font-bold text-gray-900 mb-4">Revenue Trend</h3>
+            <RevenueChart data={stats.revenueChart || []} />
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <h3 className="text-base font-bold text-gray-900 mb-4">Booking Trend</h3>
+            <BookingsChart data={stats.bookingsChart || []} />
+          </div>
         </div>
-      </div>
 
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-          <h3 className="text-base font-bold text-gray-900 mb-4">Booking Status</h3>
-          <StatusPieChart data={stats.bookings?.byStatus || []} />
-        </div>
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 lg:col-span-2">
-          <h3 className="text-base font-bold text-gray-900 mb-4">Quick Stats</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500">Open Complaints</p>
-              <p className="text-2xl font-bold text-red-600">{stats.complaints?.open || 0}</p>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500">Pending Bookings</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.bookings?.pending || 0}</p>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500">Active Hosts</p>
-              <p className="text-2xl font-bold text-blue-600">{stats.users?.hosts || 0}</p>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="text-sm text-gray-500">Avg. Rating</p>
-              <p className="text-2xl font-bold text-green-600">{stats.reviews?.avgRating?.toFixed(1) || '—'}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <h3 className="text-base font-bold text-gray-900 mb-4">Booking Status</h3>
+            <StatusPieChart data={stats.bookings?.byStatus || []} />
+          </div>
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 lg:col-span-2">
+            <h3 className="text-base font-bold text-gray-900 mb-4">Quick Stats</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-500">Open Complaints</p>
+                <p className="text-2xl font-bold text-red-600">{stats.complaints?.open || 0}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-500">Pending Bookings</p>
+                <p className="text-2xl font-bold text-yellow-600">{stats.bookings?.pending || 0}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-500">Active Hosts</p>
+                <p className="text-2xl font-bold text-blue-600">{stats.users?.hosts || 0}</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-500">Avg. Rating</p>
+                <p className="text-2xl font-bold text-green-600">{stats.reviews?.avgRating?.toFixed(1) || '—'}</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </Suspense>
     </DashboardLayout>
   )
 }
