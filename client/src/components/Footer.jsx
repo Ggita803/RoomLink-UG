@@ -23,10 +23,10 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4 text-sm">Support</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-red-500 transition">Help Center</a></li>
-              <li><a href="#" className="hover:text-red-500 transition">Contact Us</a></li>
-              <li><a href="#" className="hover:text-red-500 transition">Safety</a></li>
-              <li><a href="#" className="hover:text-red-500 transition">Report Issue</a></li>
+              <li><a href="/complaints" className="hover:text-red-500 transition">Help Center</a></li>
+              <li><a href="/complaints" className="hover:text-red-500 transition">Contact Us</a></li>
+              <li><a href="/search" className="hover:text-red-500 transition">Safety</a></li>
+              <li><a href="/complaints" className="hover:text-red-500 transition">Report Issue</a></li>
             </ul>
           </div>
 
@@ -45,10 +45,10 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4 text-sm">For Hosts</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-red-500 transition">Become a Host</a></li>
-              <li><a href="#" className="hover:text-red-500 transition">Host Resources</a></li>
-              <li><a href="#" className="hover:text-red-500 transition">Pricing</a></li>
-              <li><a href="#" className="hover:text-red-500 transition">Community</a></li>
+              <li><a href="/register" className="hover:text-red-500 transition">Become a Host</a></li>
+              <li><a href="/host/dashboard" className="hover:text-red-500 transition">Host Resources</a></li>
+              <li><a href="/search" className="hover:text-red-500 transition">Pricing</a></li>
+              <li><a href="/search" className="hover:text-red-500 transition">Community</a></li>
             </ul>
           </div>
 
@@ -56,10 +56,10 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4 text-sm">Discover</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><a href="#" className="hover:text-red-500 transition">Trending</a></li>
-              <li><a href="#" className="hover:text-red-500 transition">Top Rated</a></li>
-              <li><a href="#" className="hover:text-red-500 transition">Budget</a></li>
-              <li><a href="#" className="hover:text-red-500 transition">Luxury</a></li>
+              <li><a href="/search" className="hover:text-red-500 transition">Trending</a></li>
+              <li><a href="/search?sort=rating" className="hover:text-red-500 transition">Top Rated</a></li>
+              <li><a href="/search?priceMax=500000" className="hover:text-red-500 transition">Budget</a></li>
+              <li><a href="/search?priceMin=1500000" className="hover:text-red-500 transition">Luxury</a></li>
             </ul>
           </div>
         </div>

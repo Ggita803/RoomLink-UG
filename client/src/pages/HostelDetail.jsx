@@ -3,6 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { MapPin, Star, Wifi, Users, DollarSign, Heart } from 'lucide-react'
 import api from '../config/api'
 import toast from 'react-hot-toast'
+import useReviewStore from '../store/reviewStore'
+import useAuthStore from '../store/authStore'
+import { ReviewForm, ReviewList } from '../components/ReviewComponents'
 
 export default function HostelDetail() {
   const { id } = useParams()
@@ -11,6 +14,8 @@ export default function HostelDetail() {
   const [rooms, setRooms] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const { user } = useAuthStore()
+  const { reviews, fetchHostelReviews } = useReviewStore()
 
   useEffect(() => {
     const fetchHostel = async () => {
@@ -29,7 +34,8 @@ export default function HostelDetail() {
     }
 
     fetchHostel()
-  }, [id])
+    fetchHostelReviews(id)
+  }, [id, fetchHostelReviews])
 
   if (loading) {
     return (
@@ -160,6 +166,19 @@ export default function HostelDetail() {
                   <p className="text-gray-600">No rooms available</p>
                 )}
               </div>
+            </div>
+
+            {/* Reviews Section */}
+            <div className="mt-8">
+              <h3 className="text-2xl font-bold mb-4">
+                Reviews ({reviews.length})
+              </h3>
+              {user && (
+                <div className="mb-6">
+                  <ReviewForm hostelId={id} onSubmitted={() => fetchHostelReviews(id)} />
+                </div>
+              )}
+              <ReviewList reviews={reviews} />
             </div>
           </div>
 

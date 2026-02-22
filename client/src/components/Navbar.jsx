@@ -30,9 +30,9 @@ export default function Navbar() {
             <Link to="/" className="text-gray-700 hover:text-gray-900 font-medium">
               Explore
             </Link>
-            <a href="#" className="text-gray-700 hover:text-gray-900 font-medium">
+            <Link to="/register" className="text-gray-700 hover:text-gray-900 font-medium">
               Become a Host
-            </a>
+            </Link>
           </div>
 
           {/* Right Side */}
@@ -46,8 +46,14 @@ export default function Navbar() {
                     <User size={18} />
                   </button>
                   <div className="hidden group-hover:flex flex-col absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-200">
-                    <Link to={user?.role === 'host' ? '/host/dashboard' : '/dashboard'} className="px-4 py-2 hover:bg-gray-50 text-sm">
+                    <Link to={user?.role === 'host' ? '/host/dashboard' : user?.role === 'admin' || user?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'} className="px-4 py-2 hover:bg-gray-50 text-sm">
                       Dashboard
+                    </Link>
+                    <Link to="/profile" className="px-4 py-2 hover:bg-gray-50 text-sm">
+                      My Profile
+                    </Link>
+                    <Link to="/complaints" className="px-4 py-2 hover:bg-gray-50 text-sm">
+                      Complaints
                     </Link>
                     <button
                       onClick={handleLogout}
@@ -85,9 +91,9 @@ export default function Navbar() {
             <Link to="/" className="block px-4 py-2 text-gray-700 hover:bg-gray-50">
               Explore
             </Link>
-            <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-50">
+            <Link to="/register" className="block px-4 py-2 text-gray-700 hover:bg-gray-50">
               Become a Host
-            </a>
+            </Link>
             {!user ? (
               <>
                 <Link to="/login" className="block px-4 py-2 text-gray-700">
@@ -99,8 +105,14 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link to={user?.role === 'host' ? '/host/dashboard' : '/dashboard'} className="block px-4 py-2 text-gray-700 hover:bg-gray-50">
+                <Link to={user?.role === 'host' ? '/host/dashboard' : user?.role === 'admin' || user?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard'} className="block px-4 py-2 text-gray-700 hover:bg-gray-50">
                   Dashboard
+                </Link>
+                <Link to="/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-50">
+                  My Profile
+                </Link>
+                <Link to="/complaints" className="block px-4 py-2 text-gray-700 hover:bg-gray-50">
+                  Complaints
                 </Link>
                 <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-50">
                   Logout

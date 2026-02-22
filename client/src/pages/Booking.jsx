@@ -53,12 +53,13 @@ export default function Booking() {
     setIsSubmitting(true)
 
     try {
-      await api.post('/bookings', {
+      const { data } = await api.post('/bookings', {
         ...bookingData,
         roomId,
       })
       toast.success('Booking created! Proceeding to payment...')
-      navigate('/dashboard')
+      const bookingResult = data.data
+      navigate(`/payment/${bookingResult._id || bookingResult.bookingId}`)
     } catch (error) {
       toast.error(error.response?.data?.message || 'Booking failed')
     } finally {
