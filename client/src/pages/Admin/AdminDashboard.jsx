@@ -66,17 +66,9 @@ export default function AdminDashboard() {
     <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Admin Panel">
       <WelcomeBanner
         userName={user?.name}
-        role="admin"
         icon={ShieldCheck}
-        stats={[
-          { label: 'Users', value: stats.users?.total || 0 },
-          { label: 'Hostels', value: stats.hostels?.total || 0 },
-          { label: 'Revenue', value: `$${(stats.revenue?.total || 0).toLocaleString()}` },
-        ]}
-        actions={[
-          { label: 'View Reports', to: '/admin/reports', icon: BarChart3 },
-          { label: 'Manage Users', to: '/admin/users', icon: Users },
-        ]}
+        subtitle="Platform overview and system health."
+        action={{ label: 'View Reports', to: '/admin/reports' }}
       />
 
       {/* Stats Grid */}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Bookmark, MapPin, Calendar, LayoutDashboard, Search, MessageSquare, User, Settings, Compass, Home as HomeIcon } from 'lucide-react'
+import { Bookmark, MapPin, Calendar, LayoutDashboard, Search, MessageSquare, User, Settings, Home as HomeIcon } from 'lucide-react'
 import useAuthStore from '../store/authStore'
 import api from '../config/api'
 import toast from 'react-hot-toast'
@@ -48,17 +48,9 @@ export default function Dashboard() {
     <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="My Account">
       <WelcomeBanner
         userName={user?.name}
-        role="user"
         icon={HomeIcon}
-        stats={[
-          { label: 'Bookings', value: bookings.length },
-          { label: 'Active', value: activeBookings },
-          { label: 'Spent', value: `$${totalSpent.toLocaleString()}` },
-        ]}
-        actions={[
-          { label: 'Find Hostels', to: '/search', icon: Compass },
-          { label: 'My Profile', to: '/profile', icon: User },
-        ]}
+        subtitle="Here's a snapshot of your bookings and activity."
+        action={{ label: 'Find Hostels', to: '/search' }}
       />
 
       {/* Stats */}
@@ -76,8 +68,8 @@ export default function Dashboard() {
         </h2>
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="w-12 h-12 border-4 border-gray-300 border-t-red-500 rounded-full animate-spin mx-auto"></div>
+          <div className="flex items-center justify-center py-16">
+            <div className="w-10 h-10 border-4 border-gray-300 border-t-red-500 rounded-full animate-spin" />
           </div>
         ) : bookings.length > 0 ? (
           <div className="space-y-4">

@@ -54,10 +54,8 @@ export default function VerifyEmail() {
         </div>
 
         {!verified ? (
-          <div className="text-center py-8">
-            <div className="inline-block">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
-            </div>
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="w-10 h-10 border-4 border-gray-300 border-t-red-500 rounded-full animate-spin" />
             <p className="text-gray-600 mt-6">
               {loading ? 'Verifying email...' : 'Please wait while we verify your email.'}
             </p>

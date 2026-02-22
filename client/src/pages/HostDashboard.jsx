@@ -73,17 +73,9 @@ export default function HostDashboard() {
     <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Host Panel">
       <WelcomeBanner
         userName={user?.name}
-        role="host"
         icon={Hotel}
-        stats={[
-          { label: 'Properties', value: totalHostels },
-          { label: 'Revenue', value: `$${totalRevenue.toLocaleString()}` },
-          { label: 'Bookings', value: totalBookings },
-        ]}
-        actions={[
-          { label: 'Add New Hostel', to: '/host/add-hostel', icon: Plus },
-          { label: 'View Bookings', to: '/host/bookings', icon: CalendarDays },
-        ]}
+        subtitle="Track your properties, bookings, and revenue."
+        action={{ label: 'Add New Hostel', to: '/host/add-hostel' }}
       />
 
       {/* Stats Grid */}
