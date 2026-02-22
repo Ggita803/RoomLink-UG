@@ -32,7 +32,7 @@ cp .env.example .env
 
 Edit `.env` with your backend API URL:
 ```
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=https://curly-halibut-pjqpq9rpwv4pfv5x-5000.app.github.dev/api
 ```
 
 ## Development
@@ -77,7 +77,7 @@ src/
 The app connects to the RoomLink backend:
 
 ```
-Backend: http://localhost:5000/api
+Backend: https://curly-halibut-pjqpq9rpwv4pfv5x-5000.app.github.dev/api
 Frontend: http://localhost:5173
 ```
 

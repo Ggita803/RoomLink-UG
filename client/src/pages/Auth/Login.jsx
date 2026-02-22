@@ -30,7 +30,16 @@ export default function Login() {
       setToken(data.data.token)
       setUser(data.data.user)
       toast.success('Login successful!')
-      navigate('/dashboard')
+      
+      // Role-based redirect
+      const role = data.data.user?.role
+      if (role === 'host') {
+        navigate('/host/dashboard')
+      } else if (role === 'admin' || role === 'super_admin') {
+        navigate('/admin/dashboard')
+      } else {
+        navigate('/dashboard')
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed')
     } finally {

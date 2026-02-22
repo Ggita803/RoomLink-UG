@@ -7,32 +7,26 @@ import toast from 'react-hot-toast'
 export default function VerifyEmail() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [code, setCode] = useState('')
-  const [email, setEmail] = useState('')
+  const [token, setToken] = useState('')
   const [loading, setLoading] = useState(false)
   const [verified, setVerified] = useState(false)
-  const [timer, setTimer] = useState(0)
 
   useEffect(() => {
-    const emailParam = searchParams.get('email')
-    if (emailParam) {
-      setEmail(emailParam)
+    const tokenParam = searchParams.get('token')
+    if (!tokenParam) {
+      toast.error('Invalid verification link')
+      navigate('/login')
+    } else {
+      setToken(tokenParam)
+      // Auto-verify on mount if token is present
+      verifyEmailToken(tokenParam)
     }
-  }, [searchParams])
+  }, [searchParams, navigate])
 
-  useEffect(() => {
-    if (timer > 0) {
-      const interval = setTimeout(() => setTimer(timer - 1), 1000)
-      return () => clearTimeout(interval)
-    }
-  }, [timer])
-
-  const handleVerify = async (e) => {
-    e.preventDefault()
+  const verifyEmailToken = async (verificationToken) => {
     setLoading(true)
-
     try {
-      await api.post('/auth/verify-email', { email, code })
+      await api.post('/auth/verify-email', { token: verificationToken })
       setVerified(true)
       toast.success('Email verified successfully!')
       setTimeout(() => navigate('/login'), 2000)
@@ -43,17 +37,9 @@ export default function VerifyEmail() {
     }
   }
 
-  const handleResendCode = async () => {
-    setLoading(true)
-    try {
-      await api.post('/auth/resend-verification-code', { email })
-      setTimer(60)
-      toast.success('Verification code resent!')
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to resend code')
-    } finally {
-      setLoading(false)
-    }
+  const handleVerify = async (e) => {
+    e.preventDefault()
+    await verifyEmailToken(token)
   }
 
   return (
@@ -64,35 +50,18 @@ export default function VerifyEmail() {
             <Mail size={32} className="text-red-500" />
           </div>
           <h2 className="text-3xl font-bold">Verify Your Email</h2>
-          <p className="text-gray-600 mt-2">Enter the code sent to {email}</p>
+          <p className="text-gray-600 mt-2">Verifying your email address...</p>
         </div>
 
         {!verified ? (
-          <form onSubmit={handleVerify} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold mb-2">Verification Code</label>
-              <input
-                type="text"
-                value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="ENTER 6-DIGIT CODE"
-                maxLength="6"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none text-gray-900 placeholder-gray-400 text-center text-2xl tracking-widest font-bold"
-                required
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                Check your email for a 6-digit verification code
-              </p>
+          <div className="text-center py-8">
+            <div className="inline-block">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
             </div>
-
-            <button
-              type="submit"
-              disabled={loading || code.length !== 6}
-              className="w-full btn-primary py-3 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Verifying...' : 'Verify Email'}
-            </button>
-          </form>
+            <p className="text-gray-600 mt-6">
+              {loading ? 'Verifying email...' : 'Please wait while we verify your email.'}
+            </p>
+          </div>
         ) : (
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -100,19 +69,6 @@ export default function VerifyEmail() {
             </div>
             <h3 className="text-xl font-bold mb-2">Email Verified!</h3>
             <p className="text-gray-600">Your email has been verified successfully. Redirecting to login...</p>
-          </div>
-        )}
-
-        {!verified && (
-          <div className="mt-6 text-center border-t pt-6">
-            <p className="text-sm text-gray-600 mb-4">Didn't receive the code?</p>
-            <button
-              onClick={handleResendCode}
-              disabled={timer > 0 || loading}
-              className="text-red-500 font-semibold hover:text-red-600 disabled:text-gray-400 disabled:cursor-not-allowed"
-            >
-              {timer > 0 ? `Resend in ${timer}s` : 'Resend Code'}
-            </button>
           </div>
         )}
 

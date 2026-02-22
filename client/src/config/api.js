@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -24,8 +24,16 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('authToken')
-      window.location.href = '/login'
+      // Only clear auth if not on login/register pages (avoid redirect loop)
+      const isAuthPage = window.location.pathname.includes('/login') || 
+                         window.location.pathname.includes('/register')
+      if (!isAuthPage) {
+        localStorage.removeItem('authToken')
+        localStorage.removeItem('authUser')
+        // Use history pushState instead of full page reload
+        window.history.pushState({}, '', '/login')
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      }
     }
     return Promise.reject(error)
   }

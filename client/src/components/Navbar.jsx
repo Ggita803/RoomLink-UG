@@ -46,7 +46,7 @@ export default function Navbar() {
                     <User size={18} />
                   </button>
                   <div className="hidden group-hover:flex flex-col absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-200">
-                    <Link to="/dashboard" className="px-4 py-2 hover:bg-gray-50 text-sm">
+                    <Link to={user?.role === 'host' ? '/host/dashboard' : '/dashboard'} className="px-4 py-2 hover:bg-gray-50 text-sm">
                       Dashboard
                     </Link>
                     <button
@@ -88,7 +88,7 @@ export default function Navbar() {
             <a href="#" className="block px-4 py-2 text-gray-700 hover:bg-gray-50">
               Become a Host
             </a>
-            {!user && (
+            {!user ? (
               <>
                 <Link to="/login" className="block px-4 py-2 text-gray-700">
                   Login
@@ -96,6 +96,15 @@ export default function Navbar() {
                 <Link to="/register" className="block px-4 py-2 text-red-500 font-semibold">
                   Sign up
                 </Link>
+              </>
+            ) : (
+              <>
+                <Link to={user?.role === 'host' ? '/host/dashboard' : '/dashboard'} className="block px-4 py-2 text-gray-700 hover:bg-gray-50">
+                  Dashboard
+                </Link>
+                <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-50">
+                  Logout
+                </button>
               </>
             )}
           </div>

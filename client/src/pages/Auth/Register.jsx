@@ -119,8 +119,8 @@ export default function Register() {
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 outline-none text-gray-900"
             >
-              <option value="user">Guest</option>
-              <option value="host">Host</option>
+              <option value="user">Guest (Looking for a hostel)</option>
+              <option value="host">Host (Hostel/Property Owner)</option>
             </select>
           </div>
 

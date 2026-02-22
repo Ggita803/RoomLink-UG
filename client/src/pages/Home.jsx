@@ -13,7 +13,7 @@ export default function Home() {
     const fetchHostels = async () => {
       try {
         const { data } = await api.get('/hostels?limit=8')
-        setHostels(data.data || [])
+        setHostels(data.data?.hostels || [])
       } catch (error) {
         toast.error('Failed to load hostels')
       } finally {
@@ -27,7 +27,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-red-500 to-red-600 text-white py-16">
+      <section className="bg-gradient-to-r from-red-500 to-red-600 text-white py-32">
         <div className="container-max">
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold mb-4">
@@ -99,7 +99,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {hostels.map((hostel) => (
+              {Array.isArray(hostels) && hostels.map((hostel) => (
                 <HostelCard key={hostel._id} hostel={hostel} />
               ))}
             </div>

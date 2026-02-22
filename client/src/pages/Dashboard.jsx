@@ -19,10 +19,11 @@ export default function Dashboard() {
 
     const fetchBookings = async () => {
       try {
-        const { data } = await api.get('/bookings/user/my-bookings')
-        setBookings(data.data || [])
+        const { data } = await api.get('/bookings')
+        setBookings(data.data?.bookings || data.data || [])
       } catch (error) {
-        toast.error('Failed to load bookings')
+        // Silently handle if no bookings or unauthorized
+        console.log('Could not load bookings')
       } finally {
         setLoading(false)
       }

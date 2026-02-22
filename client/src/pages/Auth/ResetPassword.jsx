@@ -41,7 +41,7 @@ export default function ResetPassword() {
     setLoading(true)
 
     try {
-      await api.post('/auth/reset-password', { token, password })
+      await api.post('/auth/reset-password', { token, newPassword: password, confirmPassword })
       setReset(true)
       toast.success('Password reset successfully!')
       setTimeout(() => navigate('/login'), 2000)

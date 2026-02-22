@@ -12,6 +12,7 @@ import ForgotPassword from './pages/Auth/ForgotPassword'
 import VerifyEmail from './pages/Auth/VerifyEmail'
 import ResetPassword from './pages/Auth/ResetPassword'
 import Dashboard from './pages/Dashboard'
+import HostDashboard from './pages/HostDashboard'
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/host/dashboard" element={<HostDashboard />} />
           </Routes>
         </main>
         <Footer />
