@@ -1,19 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Bookmark, MapPin, Calendar, LayoutDashboard, Search, MessageSquare, User, Settings, Home as HomeIcon } from 'lucide-react'
+import { Bookmark, MapPin, Calendar, HomeIcon } from 'lucide-react'
 import useAuthStore from '../store/authStore'
 import api from '../config/api'
 import toast from 'react-hot-toast'
 import { DashboardLayout, StatsCard, WelcomeBanner } from '../components/dashboard'
-
-const sidebarItems = [
-  { path: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { divider: true, label: 'Activity' },
-  { path: '/search', label: 'Find Hostels', icon: Search },
-  { path: '/complaints', label: 'Complaints', icon: MessageSquare },
-  { divider: true, label: 'Account' },
-  { path: '/profile', label: 'Profile', icon: User },
-]
+import { userSidebarItems } from '../config/sidebarItems'
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -45,7 +37,7 @@ export default function Dashboard() {
   const totalSpent = bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0)
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="My Account">
+    <DashboardLayout sidebarItems={userSidebarItems} sidebarHeader="My Account">
       <WelcomeBanner
         userName={user?.name}
         icon={HomeIcon}

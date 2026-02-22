@@ -1,25 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Users, Search, MoreVertical, Shield, Ban, CheckCircle } from 'lucide-react'
-import {
-  LayoutDashboard, Building2, CalendarDays, AlertTriangle,
-  BarChart3, Settings,
-} from 'lucide-react'
+import { Users, Shield, Ban, CheckCircle } from 'lucide-react'
 import { DashboardLayout, DataTable, Modal } from '../../components/dashboard'
 import api from '../../config/api'
 import toast from 'react-hot-toast'
-
-const sidebarItems = [
-  { path: '/admin/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { divider: true, label: 'Management' },
-  { path: '/admin/users', label: 'Users', icon: Users },
-  { path: '/admin/hostels', label: 'Hostels', icon: Building2 },
-  { path: '/admin/bookings', label: 'Bookings', icon: CalendarDays },
-  { path: '/admin/complaints', label: 'Complaints', icon: AlertTriangle },
-  { divider: true, label: 'Reports' },
-  { path: '/admin/reports', label: 'Reports', icon: BarChart3 },
-  { divider: true, label: 'System' },
-  { path: '/profile', label: 'Settings', icon: Settings },
-]
+import { adminSidebarItems } from '../../config/sidebarItems'
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([])
@@ -148,7 +132,7 @@ export default function AdminUsers() {
   ]
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Admin Panel">
+    <DashboardLayout sidebarItems={adminSidebarItems} sidebarHeader="Admin Panel">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
         <p className="text-sm text-gray-500 mt-1">View and manage platform users</p>

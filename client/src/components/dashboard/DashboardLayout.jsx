@@ -28,8 +28,8 @@ export default function DashboardLayout({ sidebarItems = [], sidebarHeader, chil
         />
       </div>
 
-      {/* Desktop sidebar */}
-      <div className="hidden lg:block">
+      {/* Desktop sidebar - sticky */}
+      <div className="hidden lg:block flex-shrink-0 self-start sticky top-16">
         <Sidebar
           items={sidebarItems}
           header={sidebarHeader}
@@ -39,7 +39,7 @@ export default function DashboardLayout({ sidebarItems = [], sidebarHeader, chil
       </div>
 
       {/* Main content */}
-      <main className="flex-1 overflow-x-hidden">
+      <main className="flex-1 min-w-0 overflow-x-hidden">
         {/* Mobile header */}
         <div className="lg:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-200">
           <button

@@ -100,7 +100,7 @@ export default function DataTable({
                   onClick={() => col.sortable && handleSort(col.key)}
                 >
                   <span className="flex items-center gap-1">
-                    {col.header}
+                    {col.header || col.label}
                     {col.sortable && sortCol === col.key && (
                       <ChevronDown size={14} className={`transition-transform ${sortDir === 'desc' ? 'rotate-180' : ''}`} />
                     )}

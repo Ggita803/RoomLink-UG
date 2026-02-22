@@ -6,7 +6,8 @@ import {
 } from 'lucide-react'
 import useAuthStore from '../store/authStore'
 import useComplaintStore from '../store/complaintStore'
-import { Modal } from '../components/dashboard'
+import { DashboardLayout, Modal } from '../components/dashboard'
+import { hostSidebarItems, adminSidebarItems, userSidebarItems } from '../config/sidebarItems'
 
 const STATUS_STYLES = {
   open: { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: Clock },
@@ -54,9 +55,14 @@ export default function Complaints() {
     setDetailModal(true)
   }
 
+  const sidebarMap = { host: hostSidebarItems, admin: adminSidebarItems }
+  const sidebarItems = sidebarMap[user?.role] || userSidebarItems
+  const headerMap = { host: 'Host Panel', admin: 'Admin Panel' }
+  const sidebarHeader = headerMap[user?.role] || 'My Account'
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container-max py-8">
+    <DashboardLayout sidebarItems={sidebarItems} sidebarHeader={sidebarHeader}>
+      <div className="py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">My Complaints</h1>
@@ -234,6 +240,6 @@ export default function Complaints() {
           </div>
         )}
       </Modal>
-    </div>
+    </DashboardLayout>
   )
 }

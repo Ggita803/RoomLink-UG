@@ -1,26 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, MapPin, Star, Edit2, Trash2, Eye } from 'lucide-react'
+import { Plus, MapPin, Star, Edit2, Trash2, Eye, Building2 } from 'lucide-react'
 import { DashboardLayout, DataTable, Modal } from '../../components/dashboard'
 import useHostelStore from '../../store/hostelStore'
 import useAuthStore from '../../store/authStore'
-import {
-  Building2,
-  LayoutDashboard,
-  CalendarDays,
-  Star as StarIcon,
-  Settings,
-} from 'lucide-react'
-
-const sidebarItems = [
-  { path: '/host/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { divider: true, label: 'Management' },
-  { path: '/host/hostels', label: 'My Hostels', icon: Building2 },
-  { path: '/host/bookings', label: 'Bookings', icon: CalendarDays },
-  { path: '/host/reviews', label: 'Reviews', icon: StarIcon },
-  { divider: true, label: 'Account' },
-  { path: '/profile', label: 'Settings', icon: Settings },
-]
+import { hostSidebarItems } from '../../config/sidebarItems'
 
 export default function HostHostels() {
   const { user } = useAuthStore()
@@ -47,8 +31,8 @@ export default function HostHostels() {
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-            {row.images?.[0] ? (
-              <img src={row.images[0]} alt={row.name} className="w-full h-full object-cover" />
+            {row.images?.[0]?.url ? (
+              <img src={row.images[0].url} alt={row.name} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <Building2 size={20} className="text-gray-400" />
@@ -133,7 +117,7 @@ export default function HostHostels() {
   ]
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Host Panel">
+    <DashboardLayout sidebarItems={hostSidebarItems} sidebarHeader="Host Panel">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Hostels</h1>

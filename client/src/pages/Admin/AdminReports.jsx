@@ -1,24 +1,11 @@
 import { useEffect, useState } from 'react'
 import {
   BarChart3, Download,
-  LayoutDashboard, Users, Building2, CalendarDays, AlertTriangle, Settings,
 } from 'lucide-react'
 import { DashboardLayout } from '../../components/dashboard'
 import api from '../../config/api'
 import toast from 'react-hot-toast'
-
-const sidebarItems = [
-  { path: '/admin/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { divider: true, label: 'Management' },
-  { path: '/admin/users', label: 'Users', icon: Users },
-  { path: '/admin/hostels', label: 'Hostels', icon: Building2 },
-  { path: '/admin/bookings', label: 'Bookings', icon: CalendarDays },
-  { path: '/admin/complaints', label: 'Complaints', icon: AlertTriangle },
-  { divider: true, label: 'Reports' },
-  { path: '/admin/reports', label: 'Reports', icon: BarChart3 },
-  { divider: true, label: 'System' },
-  { path: '/profile', label: 'Settings', icon: Settings },
-]
+import { adminSidebarItems } from '../../config/sidebarItems'
 
 const REPORT_TYPES = [
   { id: 'booking', label: 'Booking Reports', description: 'Monthly bookings, cancellations, revenue' },
@@ -51,7 +38,7 @@ export default function AdminReports() {
   }, [activeReport, period])
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Admin Panel">
+    <DashboardLayout sidebarItems={adminSidebarItems} sidebarHeader="Admin Panel">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
         <p className="text-sm text-gray-500 mt-1">Generate and view platform reports</p>

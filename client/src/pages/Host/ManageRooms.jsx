@@ -5,23 +5,7 @@ import { DashboardLayout, DataTable, Modal } from '../../components/dashboard'
 import useHostelStore from '../../store/hostelStore'
 import api from '../../config/api'
 import toast from 'react-hot-toast'
-import {
-  Building2,
-  LayoutDashboard,
-  CalendarDays,
-  Star,
-  Settings,
-} from 'lucide-react'
-
-const sidebarItems = [
-  { path: '/host/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { divider: true, label: 'Management' },
-  { path: '/host/hostels', label: 'My Hostels', icon: Building2 },
-  { path: '/host/bookings', label: 'Bookings', icon: CalendarDays },
-  { path: '/host/reviews', label: 'Reviews', icon: Star },
-  { divider: true, label: 'Account' },
-  { path: '/profile', label: 'Settings', icon: Settings },
-]
+import { hostSidebarItems } from '../../config/sidebarItems'
 
 const ROOM_TYPES = ['single', 'double', 'triple', 'quad', 'dormitory']
 
@@ -162,7 +146,7 @@ export default function ManageRooms() {
   ]
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Host Panel">
+    <DashboardLayout sidebarItems={hostSidebarItems} sidebarHeader="Host Panel">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Manage Rooms</h1>

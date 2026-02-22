@@ -2,23 +2,10 @@ import { useEffect, useState } from 'react'
 import {
   AlertTriangle, MessageSquare, Clock, CheckCircle, XCircle,
   ArrowUpRight, StickyNote,
-  LayoutDashboard, Users, Building2, CalendarDays, BarChart3, Settings,
 } from 'lucide-react'
 import { DashboardLayout, DataTable, Modal } from '../../components/dashboard'
 import useComplaintStore from '../../store/complaintStore'
-
-const sidebarItems = [
-  { path: '/admin/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { divider: true, label: 'Management' },
-  { path: '/admin/users', label: 'Users', icon: Users },
-  { path: '/admin/hostels', label: 'Hostels', icon: Building2 },
-  { path: '/admin/bookings', label: 'Bookings', icon: CalendarDays },
-  { path: '/admin/complaints', label: 'Complaints', icon: AlertTriangle },
-  { divider: true, label: 'Reports' },
-  { path: '/admin/reports', label: 'Reports', icon: BarChart3 },
-  { divider: true, label: 'System' },
-  { path: '/profile', label: 'Settings', icon: Settings },
-]
+import { adminSidebarItems } from '../../config/sidebarItems'
 
 const STATUS_STYLES = {
   open: { bg: 'bg-yellow-100', text: 'text-yellow-700' },
@@ -140,7 +127,7 @@ export default function AdminComplaints() {
   ]
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Admin Panel">
+    <DashboardLayout sidebarItems={adminSidebarItems} sidebarHeader="Admin Panel">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Complaints Management</h1>
         <p className="text-sm text-gray-500 mt-1">Review and resolve user complaints</p>

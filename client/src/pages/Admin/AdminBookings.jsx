@@ -1,21 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Building2, LayoutDashboard, Users, CalendarDays, AlertTriangle, BarChart3, Settings, Eye, CheckCircle, XCircle, LogIn, LogOut as LogOutIcon } from 'lucide-react'
+import { Eye, CheckCircle, XCircle, LogIn, LogOut as LogOutIcon } from 'lucide-react'
 import api from '../../config/api'
 import toast from 'react-hot-toast'
 import { DashboardLayout, DataTable, Modal } from '../../components/dashboard'
-
-const sidebarItems = [
-  { path: '/admin/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { divider: true, label: 'Management' },
-  { path: '/admin/users', label: 'Users', icon: Users },
-  { path: '/admin/hostels', label: 'Hostels', icon: Building2 },
-  { path: '/admin/bookings', label: 'Bookings', icon: CalendarDays },
-  { path: '/admin/complaints', label: 'Complaints', icon: AlertTriangle },
-  { divider: true, label: 'Reports' },
-  { path: '/admin/reports', label: 'Reports', icon: BarChart3 },
-  { divider: true, label: 'System' },
-  { path: '/profile', label: 'Settings', icon: Settings },
-]
+import { adminSidebarItems } from '../../config/sidebarItems'
 
 const statusConfig = {
   pending:    { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Pending' },
@@ -182,7 +170,7 @@ export default function AdminBookings() {
   ]
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Admin Panel">
+    <DashboardLayout sidebarItems={adminSidebarItems} sidebarHeader="Admin Panel">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Manage Bookings</h1>
         <p className="text-gray-600 text-sm mt-1">View and manage all platform bookings</p>

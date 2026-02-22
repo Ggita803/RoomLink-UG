@@ -5,28 +5,15 @@ import { DashboardLayout } from '../../components/dashboard'
 import useHostelStore from '../../store/hostelStore'
 import api from '../../config/api'
 import toast from 'react-hot-toast'
-import {
-  Building2 as Building2Icon,
-  LayoutDashboard,
-  CalendarDays,
-  Star,
-  Settings,
-} from 'lucide-react'
-
-const sidebarItems = [
-  { path: '/host/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { divider: true, label: 'Management' },
-  { path: '/host/hostels', label: 'My Hostels', icon: Building2Icon },
-  { path: '/host/bookings', label: 'Bookings', icon: CalendarDays },
-  { path: '/host/reviews', label: 'Reviews', icon: Star },
-  { divider: true, label: 'Account' },
-  { path: '/profile', label: 'Settings', icon: Settings },
-]
+import { hostSidebarItems } from '../../config/sidebarItems'
+import LocationPicker from '../../components/LocationPicker'
 
 const AMENITIES = [
   'WiFi', 'Parking', 'Laundry', 'Kitchen', 'Security', 'CCTV',
   'Study Room', 'Common Area', 'Hot Water', 'Backup Power',
   'Gym', 'Swimming Pool', 'Air Conditioning', 'TV Room',
+  'Lounge', 'Garden', 'AC', 'Breakfast Included',
+  'Pet Friendly', 'Wheelchair Friendly', 'Library', 'Game Room',
 ]
 
 export default function EditHostel() {
@@ -35,11 +22,13 @@ export default function EditHostel() {
   const { updateHostel, loading } = useHostelStore()
 
   const [form, setForm] = useState({
-    name: '', description: '', city: '', address: '',
-    phone: '', email: '',
+    name: '', description: '', street: '', city: '',
+    state: '', country: 'Uganda',
+    contactPhone: '', contactEmail: '',
     priceRange: { min: '', max: '' },
     amenities: [],
   })
+  const [coordinates, setCoordinates] = useState(null)
   const [existingImages, setExistingImages] = useState([])
   const [newImages, setNewImages] = useState([])
   const [newPreviews, setNewPreviews] = useState([])
@@ -53,13 +42,18 @@ export default function EditHostel() {
         setForm({
           name: h.name || '',
           description: h.description || '',
-          city: h.city || '',
-          address: h.address || '',
-          phone: h.phone || '',
-          email: h.email || '',
+          street: h.address?.street || '',
+          city: h.address?.city || '',
+          state: h.address?.state || '',
+          country: h.address?.country || 'Uganda',
+          contactPhone: h.contactPhone || '',
+          contactEmail: h.contactEmail || '',
           priceRange: h.priceRange || { min: '', max: '' },
           amenities: h.amenities || [],
         })
+        if (h.coordinates?.coordinates) {
+          setCoordinates(h.coordinates.coordinates)
+        }
         setExistingImages(h.images || [])
       } catch {
         toast.error('Failed to load hostel details')
@@ -113,10 +107,20 @@ export default function EditHostel() {
     const formData = new FormData()
     formData.append('name', form.name)
     formData.append('description', form.description)
-    formData.append('city', form.city)
-    formData.append('address', form.address)
-    formData.append('phone', form.phone)
-    formData.append('email', form.email)
+    formData.append('address', JSON.stringify({
+      street: form.street,
+      city: form.city,
+      state: form.state,
+      country: form.country,
+    }))
+    if (coordinates) {
+      formData.append('coordinates', JSON.stringify({
+        type: 'Point',
+        coordinates: coordinates,
+      }))
+    }
+    formData.append('contactPhone', form.contactPhone)
+    formData.append('contactEmail', form.contactEmail)
     formData.append('priceRange', JSON.stringify({
       min: Number(form.priceRange.min),
       max: Number(form.priceRange.max),
@@ -133,7 +137,7 @@ export default function EditHostel() {
 
   if (fetchLoading) {
     return (
-      <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Host Panel">
+      <DashboardLayout sidebarItems={hostSidebarItems} sidebarHeader="Host Panel">
         <div className="flex items-center justify-center py-20">
           <div className="w-10 h-10 border-4 border-gray-300 border-t-red-500 rounded-full animate-spin" />
         </div>
@@ -142,7 +146,7 @@ export default function EditHostel() {
   }
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Host Panel">
+    <DashboardLayout sidebarItems={hostSidebarItems} sidebarHeader="Host Panel">
       <div className="max-w-3xl">
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Edit Hostel</h1>
         <p className="text-sm text-gray-500 mb-6">Update your hostel listing details</p>
@@ -174,22 +178,37 @@ export default function EditHostel() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Street Address *</label>
+                <input type="text" name="street" value={form.street} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" required />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
                 <input type="text" name="city" value={form.city} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" required />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
-                <input type="text" name="address" value={form.address} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" required />
+                <label className="block text-sm font-medium text-gray-700 mb-1">State / Region</label>
+                <input type="text" name="state" value={form.state} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                <input type="tel" name="phone" value={form.phone} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                <input type="text" name="country" value={form.country} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input type="email" name="email" value={form.email} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Phone *</label>
+                <input type="tel" name="contactPhone" value={form.contactPhone} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email *</label>
+                <input type="email" name="contactEmail" value={form.contactEmail} onChange={handleChange} className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" required />
               </div>
             </div>
+
+            {/* Map Picker */}
+            <LocationPicker
+              value={coordinates}
+              onChange={setCoordinates}
+              className="mt-4"
+            />
           </div>
 
           {/* Pricing */}

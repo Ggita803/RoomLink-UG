@@ -12,6 +12,11 @@ const PageLoader = () => (
   </div>
 )
 
+// Wrap lazy components so each route has its own Suspense boundary
+function Lazy({ children }) {
+  return <Suspense fallback={<PageLoader />}>{children}</Suspense>
+}
+
 // Public pages (eagerly loaded for fast first paint)
 import Home from './pages/Home'
 import Search from './pages/Search'
@@ -55,7 +60,6 @@ function App() {
       <div className="min-h-screen flex flex-col bg-white">
         <Navbar />
         <main className="flex-grow">
-          <Suspense fallback={<PageLoader />}>
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
@@ -63,40 +67,39 @@ function App() {
             <Route path="/hostel/:id" element={<HostelDetail />} />
 
             {/* Auth Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/login" element={<Lazy><Login /></Lazy>} />
+            <Route path="/register" element={<Lazy><Register /></Lazy>} />
+            <Route path="/forgot-password" element={<Lazy><ForgotPassword /></Lazy>} />
+            <Route path="/verify-email" element={<Lazy><VerifyEmail /></Lazy>} />
+            <Route path="/reset-password" element={<Lazy><ResetPassword /></Lazy>} />
 
             {/* Authenticated User Routes */}
-            <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-            <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-            <Route path="/booking/:roomId" element={<PrivateRoute><Booking /></PrivateRoute>} />
-            <Route path="/payment/:bookingId" element={<PrivateRoute><Payment /></PrivateRoute>} />
-            <Route path="/complaints" element={<PrivateRoute><Complaints /></PrivateRoute>} />
+            <Route path="/dashboard" element={<PrivateRoute><Lazy><Dashboard /></Lazy></PrivateRoute>} />
+            <Route path="/profile" element={<PrivateRoute><Lazy><Profile /></Lazy></PrivateRoute>} />
+            <Route path="/booking/:roomId" element={<PrivateRoute><Lazy><Booking /></Lazy></PrivateRoute>} />
+            <Route path="/payment/:bookingId" element={<PrivateRoute><Lazy><Payment /></Lazy></PrivateRoute>} />
+            <Route path="/complaints" element={<PrivateRoute><Lazy><Complaints /></Lazy></PrivateRoute>} />
 
             {/* Host Routes */}
-            <Route path="/host/dashboard" element={<PrivateRoute roles={['host']}><HostDashboard /></PrivateRoute>} />
-            <Route path="/host/hostels" element={<PrivateRoute roles={['host']}><HostHostels /></PrivateRoute>} />
-            <Route path="/host/add-hostel" element={<PrivateRoute roles={['host']}><AddHostel /></PrivateRoute>} />
-            <Route path="/host/hostels/:id/edit" element={<PrivateRoute roles={['host']}><EditHostel /></PrivateRoute>} />
-            <Route path="/host/hostels/:hostelId/rooms" element={<PrivateRoute roles={['host']}><ManageRooms /></PrivateRoute>} />
-            <Route path="/host/bookings" element={<PrivateRoute roles={['host']}><HostBookings /></PrivateRoute>} />
-            <Route path="/host/reviews" element={<PrivateRoute roles={['host']}><HostReviews /></PrivateRoute>} />
+            <Route path="/host/dashboard" element={<PrivateRoute roles={['host']}><Lazy><HostDashboard /></Lazy></PrivateRoute>} />
+            <Route path="/host/hostels" element={<PrivateRoute roles={['host']}><Lazy><HostHostels /></Lazy></PrivateRoute>} />
+            <Route path="/host/add-hostel" element={<PrivateRoute roles={['host']}><Lazy><AddHostel /></Lazy></PrivateRoute>} />
+            <Route path="/host/hostels/:id/edit" element={<PrivateRoute roles={['host']}><Lazy><EditHostel /></Lazy></PrivateRoute>} />
+            <Route path="/host/hostels/:hostelId/rooms" element={<PrivateRoute roles={['host']}><Lazy><ManageRooms /></Lazy></PrivateRoute>} />
+            <Route path="/host/bookings" element={<PrivateRoute roles={['host']}><Lazy><HostBookings /></Lazy></PrivateRoute>} />
+            <Route path="/host/reviews" element={<PrivateRoute roles={['host']}><Lazy><HostReviews /></Lazy></PrivateRoute>} />
 
             {/* Admin Routes */}
-            <Route path="/admin/dashboard" element={<PrivateRoute roles={['admin', 'ADMIN', 'SUPER_ADMIN']}><AdminDashboard /></PrivateRoute>} />
-            <Route path="/admin/users" element={<PrivateRoute roles={['admin', 'ADMIN', 'SUPER_ADMIN']}><AdminUsers /></PrivateRoute>} />
-            <Route path="/admin/hostels" element={<PrivateRoute roles={['admin', 'ADMIN', 'SUPER_ADMIN']}><AdminHostels /></PrivateRoute>} />
-            <Route path="/admin/bookings" element={<PrivateRoute roles={['admin', 'ADMIN', 'SUPER_ADMIN']}><AdminBookings /></PrivateRoute>} />
-            <Route path="/admin/complaints" element={<PrivateRoute roles={['admin', 'ADMIN', 'SUPER_ADMIN', 'staff', 'STAFF']}><AdminComplaints /></PrivateRoute>} />
-            <Route path="/admin/reports" element={<PrivateRoute roles={['admin', 'ADMIN', 'SUPER_ADMIN']}><AdminReports /></PrivateRoute>} />
+            <Route path="/admin/dashboard" element={<PrivateRoute roles={['admin', 'ADMIN', 'SUPER_ADMIN']}><Lazy><AdminDashboard /></Lazy></PrivateRoute>} />
+            <Route path="/admin/users" element={<PrivateRoute roles={['admin', 'ADMIN', 'SUPER_ADMIN']}><Lazy><AdminUsers /></Lazy></PrivateRoute>} />
+            <Route path="/admin/hostels" element={<PrivateRoute roles={['admin', 'ADMIN', 'SUPER_ADMIN']}><Lazy><AdminHostels /></Lazy></PrivateRoute>} />
+            <Route path="/admin/bookings" element={<PrivateRoute roles={['admin', 'ADMIN', 'SUPER_ADMIN']}><Lazy><AdminBookings /></Lazy></PrivateRoute>} />
+            <Route path="/admin/complaints" element={<PrivateRoute roles={['admin', 'ADMIN', 'SUPER_ADMIN', 'staff', 'STAFF']}><Lazy><AdminComplaints /></Lazy></PrivateRoute>} />
+            <Route path="/admin/reports" element={<PrivateRoute roles={['admin', 'ADMIN', 'SUPER_ADMIN']}><Lazy><AdminReports /></Lazy></PrivateRoute>} />
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          </Suspense>
         </main>
         <Footer />
         <Toaster position="top-right" />

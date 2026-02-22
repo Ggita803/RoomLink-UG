@@ -3,28 +3,15 @@ import { useNavigate } from 'react-router-dom'
 import { Upload, X, Building2, MapPin, FileText, DollarSign, Image } from 'lucide-react'
 import { DashboardLayout } from '../../components/dashboard'
 import useHostelStore from '../../store/hostelStore'
-import {
-  Building2 as Building2Icon,
-  LayoutDashboard,
-  CalendarDays,
-  Star,
-  Settings,
-} from 'lucide-react'
-
-const sidebarItems = [
-  { path: '/host/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { divider: true, label: 'Management' },
-  { path: '/host/hostels', label: 'My Hostels', icon: Building2Icon },
-  { path: '/host/bookings', label: 'Bookings', icon: CalendarDays },
-  { path: '/host/reviews', label: 'Reviews', icon: Star },
-  { divider: true, label: 'Account' },
-  { path: '/profile', label: 'Settings', icon: Settings },
-]
+import { hostSidebarItems } from '../../config/sidebarItems'
+import LocationPicker from '../../components/LocationPicker'
 
 const AMENITIES = [
   'WiFi', 'Parking', 'Laundry', 'Kitchen', 'Security', 'CCTV',
   'Study Room', 'Common Area', 'Hot Water', 'Backup Power',
   'Gym', 'Swimming Pool', 'Air Conditioning', 'TV Room',
+  'Lounge', 'Garden', 'AC', 'Breakfast Included',
+  'Pet Friendly', 'Wheelchair Friendly', 'Library', 'Game Room',
 ]
 
 export default function AddHostel() {
@@ -34,15 +21,18 @@ export default function AddHostel() {
   const [form, setForm] = useState({
     name: '',
     description: '',
+    street: '',
     city: '',
-    address: '',
-    phone: '',
-    email: '',
+    state: '',
+    country: 'Uganda',
+    contactPhone: '',
+    contactEmail: '',
     priceRange: { min: '', max: '' },
     amenities: [],
   })
   const [images, setImages] = useState([])
   const [previews, setPreviews] = useState([])
+  const [coordinates, setCoordinates] = useState(null) // [lng, lat]
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -84,10 +74,18 @@ export default function AddHostel() {
     const formData = new FormData()
     formData.append('name', form.name)
     formData.append('description', form.description)
-    formData.append('city', form.city)
-    formData.append('address', form.address)
-    formData.append('phone', form.phone)
-    formData.append('email', form.email)
+    formData.append('address', JSON.stringify({
+      street: form.street,
+      city: form.city,
+      state: form.state,
+      country: form.country,
+    }))
+    formData.append('coordinates', JSON.stringify({
+      type: 'Point',
+      coordinates: coordinates || [32.5825, 0.3476],
+    }))
+    formData.append('contactPhone', form.contactPhone)
+    formData.append('contactEmail', form.contactEmail)
     formData.append('priceRange', JSON.stringify({
       min: Number(form.priceRange.min),
       max: Number(form.priceRange.max),
@@ -102,7 +100,7 @@ export default function AddHostel() {
   }
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Host Panel">
+    <DashboardLayout sidebarItems={hostSidebarItems} sidebarHeader="Host Panel">
       <div className="max-w-3xl">
         <h1 className="text-2xl font-bold text-gray-900 mb-1">Add New Hostel</h1>
         <p className="text-sm text-gray-500 mb-6">Fill in the details to list a new hostel</p>
@@ -150,6 +148,18 @@ export default function AddHostel() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Street Address *</label>
+                <input
+                  type="text"
+                  name="street"
+                  value={form.street}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+                  required
+                  placeholder="e.g., Plot 12 University Road"
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
                 <input
                   type="text"
@@ -162,40 +172,59 @@ export default function AddHostel() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">State / Region</label>
                 <input
                   type="text"
-                  name="address"
-                  value={form.address}
+                  name="state"
+                  value={form.state}
                   onChange={handleChange}
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
-                  required
-                  placeholder="Street address"
+                  placeholder="e.g., Central"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
                 <input
-                  type="tel"
-                  name="phone"
-                  value={form.phone}
+                  type="text"
+                  name="country"
+                  value={form.country}
                   onChange={handleChange}
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+                  placeholder="Uganda"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Phone *</label>
+                <input
+                  type="tel"
+                  name="contactPhone"
+                  value={form.contactPhone}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+                  required
                   placeholder="+256 7XX XXX XXX"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email *</label>
                 <input
                   type="email"
-                  name="email"
-                  value={form.email}
+                  name="contactEmail"
+                  value={form.contactEmail}
                   onChange={handleChange}
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400"
+                  required
                   placeholder="hostel@example.com"
                 />
               </div>
             </div>
+
+            {/* Map Picker */}
+            <LocationPicker
+              value={coordinates}
+              onChange={setCoordinates}
+              className="mt-4"
+            />
           </div>
 
           {/* Pricing */}

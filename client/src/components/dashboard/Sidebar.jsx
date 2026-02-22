@@ -13,7 +13,7 @@ export default function Sidebar({ items = [], header, collapsed: controlledColla
     <aside
       className={`${
         collapsed ? 'w-[68px]' : 'w-64'
-      } bg-white border-r border-gray-200 min-h-[calc(100vh-4rem)] flex flex-col transition-all duration-300 ease-in-out flex-shrink-0`}
+      } bg-white border-r border-gray-200 h-[calc(100vh-4rem)] sticky top-16 flex flex-col transition-all duration-300 ease-in-out flex-shrink-0`}
     >
       {/* Header */}
       {header && !collapsed && (

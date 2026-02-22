@@ -3,30 +3,18 @@ import { useNavigate } from 'react-router-dom'
 import {
   Users, Building2, CalendarDays, DollarSign, AlertTriangle,
   BarChart3, Shield, FileText,
-  LayoutDashboard, Settings, ShieldCheck,
+  ShieldCheck,
 } from 'lucide-react'
 import { DashboardLayout, StatsCard, WelcomeBanner } from '../../components/dashboard'
 import useAuthStore from '../../store/authStore'
 import api from '../../config/api'
 import toast from 'react-hot-toast'
+import { adminSidebarItems } from '../../config/sidebarItems'
 
 // Lazy-load individual charts (Recharts is large)
 const RevenueChart = lazy(() => import('../../components/dashboard/Charts').then(m => ({ default: m.RevenueChart })))
 const BookingsChart = lazy(() => import('../../components/dashboard/Charts').then(m => ({ default: m.BookingsChart })))
 const StatusPieChart = lazy(() => import('../../components/dashboard/Charts').then(m => ({ default: m.StatusPieChart })))
-
-const sidebarItems = [
-  { path: '/admin/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { divider: true, label: 'Management' },
-  { path: '/admin/users', label: 'Users', icon: Users },
-  { path: '/admin/hostels', label: 'Hostels', icon: Building2 },
-  { path: '/admin/bookings', label: 'Bookings', icon: CalendarDays },
-  { path: '/admin/complaints', label: 'Complaints', icon: AlertTriangle },
-  { divider: true, label: 'Reports' },
-  { path: '/admin/reports', label: 'Reports', icon: BarChart3 },
-  { divider: true, label: 'System' },
-  { path: '/profile', label: 'Settings', icon: Settings },
-]
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
@@ -52,7 +40,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Admin Panel">
+      <DashboardLayout sidebarItems={adminSidebarItems} sidebarHeader="Admin Panel">
         <div className="flex items-center justify-center py-20">
           <div className="w-10 h-10 border-4 border-gray-300 border-t-red-500 rounded-full animate-spin" />
         </div>
@@ -63,7 +51,7 @@ export default function AdminDashboard() {
   const stats = dashboard || {}
 
   return (
-    <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Admin Panel">
+    <DashboardLayout sidebarItems={adminSidebarItems} sidebarHeader="Admin Panel">
       <WelcomeBanner
         userName={user?.name}
         icon={ShieldCheck}

@@ -46,6 +46,10 @@ app.use(auditMiddleware);
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ limit: "10kb", extended: true }));
 
+// Serve uploaded files statically
+const path = require("path");
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
 // Swagger API Documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 

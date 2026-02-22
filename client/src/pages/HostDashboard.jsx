@@ -1,20 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Building2, DollarSign, Star, Users, AlertCircle, TrendingUp, Plus, LayoutDashboard, CalendarDays, Settings, Hotel } from 'lucide-react'
+import { Building2, DollarSign, Star, Users, AlertCircle, TrendingUp, Plus, Hotel, CalendarDays, MessageSquare } from 'lucide-react'
 import useAuthStore from '../store/authStore'
 import api from '../config/api'
 import toast from 'react-hot-toast'
-import { DashboardLayout, StatsCard, WelcomeBanner } from '../components/dashboard'
-
-const sidebarItems = [
-  { path: '/host/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { divider: true, label: 'Management' },
-  { path: '/host/hostels', label: 'My Hostels', icon: Building2 },
-  { path: '/host/bookings', label: 'Bookings', icon: CalendarDays },
-  { path: '/host/reviews', label: 'Reviews', icon: Star },
-  { divider: true, label: 'Account' },
-  { path: '/profile', label: 'Settings', icon: Settings },
-]
+import { DashboardLayout, StatsCard, WelcomeBanner, ActivityFeed } from '../components/dashboard'
+import { hostSidebarItems } from '../config/sidebarItems'
 
 export default function HostDashboard() {
   const navigate = useNavigate()
@@ -48,7 +39,7 @@ export default function HostDashboard() {
 
   if (loading) {
     return (
-      <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Host Panel">
+      <DashboardLayout sidebarItems={hostSidebarItems} sidebarHeader="Host Panel">
         <div className="flex items-center justify-center py-20">
           <div className="w-12 h-12 border-4 border-gray-300 border-t-red-500 rounded-full animate-spin"></div>
         </div>
@@ -69,8 +60,19 @@ export default function HostDashboard() {
     return acc
   }, {})
 
+  // Build recent activity from dashboard data
+  const recentActivity = (stats.recentBookings || stats.recentActivity || []).map((item) => ({
+    _id: item._id,
+    type: item.type || 'booking',
+    icon: item.type === 'review' ? MessageSquare : CalendarDays,
+    user: item.user?.name || item.userName || '',
+    message: item.message || `${item.status || 'new'} booking`,
+    detail: item.hostel?.name || item.hostelName || '',
+    time: item.createdAt || item.date,
+  }))
+
   return (
-    <DashboardLayout sidebarItems={sidebarItems} sidebarHeader="Host Panel">
+    <DashboardLayout sidebarItems={hostSidebarItems} sidebarHeader="Host Panel">
       <WelcomeBanner
         userName={user?.name}
         icon={Hotel}
@@ -149,6 +151,15 @@ export default function HostDashboard() {
               </Link>
             </div>
           </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="mb-8">
+          <ActivityFeed
+            activities={recentActivity}
+            title="Recent Activity"
+            maxItems={6}
+          />
         </div>
 
         {/* No Hostels CTA */}
