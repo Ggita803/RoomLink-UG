@@ -83,7 +83,7 @@ export default function Search() {
                     />
                   </div>
                   <div className="text-sm text-gray-600">
-                    ${filters.priceMin} - ${filters.priceMax}
+                    UGX {filters.priceMin?.toLocaleString()} - UGX {filters.priceMax?.toLocaleString()}
                   </div>
                 </div>
               </div>
@@ -137,7 +137,7 @@ export default function Search() {
               {(filters.priceMax !== 200 || filters.rating !== 0 || filters.amenities.length > 0) && (
                 <button
                   onClick={() => setFilters({ priceMin: 0, priceMax: 200, rating: 0, amenities: [] })}
-                  className="w-full mt-4 text-sm text-red-500 hover:text-red-700 font-semibold"
+                  className="w-full mt-4 text-sm text-sky-500 font-semibold hover:text-sky-600"
                 >
                   Reset All Filters
                 </button>

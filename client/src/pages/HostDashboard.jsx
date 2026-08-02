@@ -41,7 +41,7 @@ export default function HostDashboard() {
     return (
       <DashboardLayout sidebarItems={hostSidebarItems} sidebarHeader="Host Panel">
         <div className="flex items-center justify-center py-20">
-          <div className="w-12 h-12 border-4 border-gray-300 border-t-red-500 rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-4 border-gray-300 border-t-sky-400 rounded-full animate-spin"></div>
         </div>
       </DashboardLayout>
     )
@@ -78,12 +78,13 @@ export default function HostDashboard() {
         icon={Hotel}
         subtitle="Track your properties, bookings, and revenue."
         action={{ label: 'Add New Hostel', to: '/host/add-hostel' }}
+        className="rounded-[5px] text-white"
       />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatsCard title="My Hostels" value={totalHostels} icon={Building2} color="blue" />
-        <StatsCard title="Total Revenue" value={totalRevenue} icon={DollarSign} color="green" prefix="$" />
+        <StatsCard title="Total Revenue" value={totalRevenue} icon={DollarSign} color="green" prefix="UGX " />
         <StatsCard title="Total Bookings" value={totalBookings} icon={Users} color="purple" />
         <StatsCard title="Avg Rating" value={`${avgRating} (${totalReviews})`} icon={Star} color="yellow" />
       </div>
@@ -102,7 +103,7 @@ export default function HostDashboard() {
                 { label: 'Pending', key: 'pending', color: 'bg-yellow-500' },
                 { label: 'Checked In', key: 'checked_in', color: 'bg-blue-500' },
                 { label: 'Completed', key: 'completed', color: 'bg-gray-500' },
-                { label: 'Cancelled', key: 'cancelled', color: 'bg-red-500' },
+                { label: 'Cancelled', key: 'cancelled', color: 'bg-sky-500' },
               ].map(({ label, key, color }) => (
                 <div key={key} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -123,8 +124,8 @@ export default function HostDashboard() {
             </h2>
 
             {openComplaints > 0 && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                <p className="text-red-800 font-semibold">
+              <div className="bg-sky-50 border border-sky-200 rounded-lg p-4 mb-4">
+                <p className="text-sky-800 font-semibold">
                   {openComplaints} open complaint{openComplaints > 1 ? 's' : ''} need attention
                 </p>
               </div>

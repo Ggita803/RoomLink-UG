@@ -24,7 +24,7 @@ export default function HostelCard({ hostel }) {
           >
             <Heart
               size={20}
-              className={isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-700'}
+              className={isFavorite ? 'fill-blue-500 text-blue-500' : 'text-gray-700'}
             />
           </button>
         </div>
@@ -53,8 +53,8 @@ export default function HostelCard({ hostel }) {
           </div>
 
           <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-bold">${hostel.minPrice || 15}</span>
-            <span className="text-gray-600 text-sm">/night</span>
+            <span className="text-2xl font-bold">UGX {hostel.minPrice?.toLocaleString() || 1500000}</span>
+            <span className="text-gray-600 text-sm">/semester</span>
           </div>
         </div>
       </div>
